@@ -43,7 +43,7 @@
       <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
         <div>
           <h2 class="font-bold text-indigo-900 text-lg">🎓 學生練習區</h2>
-          <p class="text-xs text-indigo-700">選擇題目後，可以使用語音或文字回答，AI 將會即時給予精準分析與建議！</p>
+          <p class="text-xs text-indigo-700">選擇題目後，可嘗試自主回答或點擊「觀看 AI 建議答案」學習答題技巧！</p>
         </div>
         <span class="text-xs bg-indigo-200 text-indigo-800 px-2.5 py-1 rounded-md font-medium" id="questionCountBadge">0 道題目</span>
       </div>
@@ -57,13 +57,28 @@
           </select>
         </div>
 
-        <div id="currentQuestionBox" class="hidden space-y-2 pt-1">
-          <div class="flex items-center gap-2">
-            <span id="qBandBadge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-700">BAND 1</span>
-            <span id="qLangBadge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-700">中文</span>
+        <div id="currentQuestionBox" class="hidden space-y-3 pt-1">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="qBandBadge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-700">BAND 1</span>
+              <span id="qLangBadge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-700">中文</span>
+            </div>
+            <button onclick="toggleSampleAnswer()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition">
+              <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
+              <span id="sampleBtnText">觀看 AI 建議答案</span>
+            </button>
           </div>
           <h3 id="currentQuestionTitle" class="text-lg font-bold text-slate-800 leading-snug">--</h3>
           <p id="currentQuestionDesc" class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">--</p>
+
+          <!-- AI 建議答案展示區塊 -->
+          <div id="sampleAnswerBox" class="hidden bg-amber-50/80 border border-amber-200 rounded-xl p-4 space-y-2 transition">
+            <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
+              <span>AI 面試官建議答案與答題框架</span>
+            </div>
+            <div id="sampleAnswerContent" class="text-xs text-amber-950 leading-relaxed whitespace-pre-wrap">--</div>
+          </div>
         </div>
       </div>
 
@@ -90,13 +105,13 @@
         </button>
       </div>
 
-      <!-- AI Feedback Result (無分數，純點評) -->
+      <!-- AI Feedback Result -->
       <div id="aiResultBox" class="hidden bg-white rounded-xl shadow-md border border-indigo-100 p-5 space-y-3">
         <div class="flex justify-between items-center border-b border-slate-100 pb-2">
           <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
-            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官回饋與評語
+            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官點評與回饋
           </h3>
-          <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md">精準點評模式</span>
+          <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md">無分數精準點評</span>
         </div>
         <div id="aiFeedbackContent" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 p-4 rounded-xl border border-slate-200">
           分析中...
@@ -137,7 +152,7 @@
     </div>
   </main>
 
-  <!-- Add/Edit Question Modal -->
+  <!-- Add/Edit Question Modal (已新增 AI 輔助生成建議按鈕) -->
   <div id="qModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-lg w-full p-5 space-y-3 shadow-2xl">
       <h3 id="modalTitle" class="font-bold text-slate-800 text-base">新增問題</h3>
@@ -167,8 +182,13 @@
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-600 mb-1">答題提示 / 說明 (可選)</label>
-        <textarea id="qDescInput" rows="2" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例如：重點分享個人興趣與優點..."></textarea>
+        <div class="flex justify-between items-center mb-1">
+          <label class="block text-xs font-semibold text-slate-600">答題提示 / AI 參考答案 (可選)</label>
+          <button type="button" onclick="teacherGenerateAiAnswer()" id="teacherAiGenBtn" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded transition">
+            <i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成參考答案
+          </button>
+        </div>
+        <textarea id="qDescInput" rows="3" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="可手動輸入提示，或點擊右上角按鈕讓 AI 自動生成參考答案與答題切入點..."></textarea>
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
@@ -377,9 +397,72 @@
       document.getElementById('currentQuestionTitle').innerText = q.title;
       document.getElementById('currentQuestionDesc').innerText = q.desc || '無補充說明';
       
+      document.getElementById('sampleAnswerBox').classList.add('hidden');
+      document.getElementById('sampleBtnText').innerText = '觀看 AI 建議答案';
+      
       box.classList.remove('hidden');
       answerArea.classList.remove('hidden');
       document.getElementById('aiResultBox').classList.add('hidden');
+    }
+
+    function toggleSampleAnswer() {
+      const sampleBox = document.getElementById('sampleAnswerBox');
+      const btnText = document.getElementById('sampleBtnText');
+      const isHidden = sampleBox.classList.contains('hidden');
+
+      if (isHidden) {
+        const q = questions[currentQKey];
+        const isEnglish = q.lang === "English";
+        let sampleContent = "";
+
+        if (q.desc && q.desc.trim().length > 0) {
+          sampleContent = `【教師補充與建議參考】：\n${q.desc}`;
+        } else {
+          if (isEnglish) {
+            sampleContent = `【答題切入點】：Direct Answer + Key Reasons + Personal Example
+【建議解答參考】：
+"Thank you for this question. Regarding '${q.title}', I believe the most important aspect is to stay proactive and maintain positive attitude. For instance, in my primary school experience, I always try to break down large tasks into smaller steps and collaborate effectively with my peers. This approach not only helps me overcome challenges but also strengthens my problem-solving skills."`;
+          } else {
+            sampleContent = `【答題結構建議】：直接結論 ＋ 核心理由 ＋ 個人具體實例 ＋ 總結延伸
+【建議解答參考】：
+「面試官你好，針對『${q.title}』這個話題，我認為最重要的是保持積極主動的學習態度與團隊合作精神。例如在小學六年的校園生活中，我曾參與過小組專題研習活動，當時我們面對時間緊迫的挑戰，我主動與隊友溝通分工，最終順利完成任務。這次經驗讓我體會到面對困難時，冷靜分析與同理心溝通才是解決問題的關鍵。」`;
+          }
+        }
+
+        document.getElementById('sampleAnswerContent').innerText = sampleContent;
+        sampleBox.classList.remove('hidden');
+        btnText.innerText = '隱藏建議答案';
+      } else {
+        sampleBox.classList.add('hidden');
+        btnText.innerText = '觀看 AI 建議答案';
+      }
+    }
+
+    // 教師端：點擊生成 AI 參考答案
+    function teacherGenerateAiAnswer() {
+      const title = document.getElementById('qTitleInput').value.trim();
+      const band = document.getElementById('qBand').value;
+      const lang = document.getElementById('qLang').value;
+      const btn = document.getElementById('teacherAiGenBtn');
+
+      if (!title) {
+        alert("請先輸入題目內容，AI 才能為您生成建議答案！");
+        return;
+      }
+
+      btn.innerText = "生成中...";
+      setTimeout(() => {
+        let generatedText = "";
+        if (lang === "English") {
+          generatedText = `[AI 參考答案與解題框架]\n1. 答題切入點: Express clear opinion + Provide 1 personal example + Wrap up with learning outcome.\n2. 示範回答: "In response to '${title}', I believe taking initiative is essential. For example, during a group project in primary school, I took the lead in organizing our research notes, which earned us positive feedback."`;
+        } else {
+          generatedText = `[AI 參考答案與解題框架]\n1. 答題切入點：表明個人核心觀點 ＋ 結合小學真實事例（STAR原則） ＋ 總結延伸與學習成長。\n2. 示範回答：「關於『${title}』這個話題，我認為最關鍵的是保持專注與持續學習。例如上學期的專題研習中，我主動負責資料整理與匯報，雖然過程遇到困難，但最終鍛鍊了我的溝通與分析能力。」`;
+        }
+
+        document.getElementById('qDescInput').value = generatedText;
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成參考答案`;
+        lucide.createIcons();
+      }, 800);
     }
 
     function setupSpeechRecognition() {
@@ -451,7 +534,6 @@
       document.getElementById('studentAnswer').value = '';
     }
 
-    // 免 API Key 的精準邏輯分析引擎
     function submitAnswerForAI() {
       const ans = document.getElementById('studentAnswer').value.trim();
       if (!ans) {
@@ -469,7 +551,6 @@
       setTimeout(() => {
         const isEnglish = q.lang === "English";
         
-        // 亂答 / 敷衍 判定條件
         const isTooShort = ans.length < 8;
         const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
         const isRepeated = /(.)\1{4,}/.test(ans);
@@ -478,7 +559,6 @@
         let feedback = "";
 
         if (isEnglish) {
-          // 英文題目點評
           if (isTooShort || isGibberish || isRepeated || isOffTopic) {
             feedback = `🟢 Strengths:
 • Attempted to provide an answer.
@@ -504,7 +584,6 @@
 • Sample Answer: "In my opinion, effective communication is key. For example, during a science project last year, we listened to each other's views and successfully divided the workload."`;
           }
         } else {
-          // 中文題目點評
           if (isTooShort || isGibberish || isRepeated || isOffTopic) {
             feedback = `🟢 優點 (Strengths)：
 • 學生嘗試進行了輸入作答。
