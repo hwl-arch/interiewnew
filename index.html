@@ -62,4 +62,613 @@
             <span id="qBandBadge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-700">BAND 1</span>
             <span id="qLangBadge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-700">中文</span>
           </div>
-          <h3 id="currentQuestionTitle" class="text
+          <h3 id="currentQuestionTitle" class="text-lg font-bold text-slate-800 leading-snug">--</h3>
+          <p id="currentQuestionDesc" class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">--</p>
+        </div>
+      </div>
+
+      <!-- Answer Input Area -->
+      <div id="answerArea" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2 text-sm">
+          <i data-lucide="message-square" class="w-4 h-4 text-indigo-600"></i> 作答區域
+        </h3>
+
+        <div class="space-y-2">
+          <textarea id="studentAnswer" rows="4" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-700 text-sm leading-relaxed" placeholder="請輸入你的答案，或點擊下方「語音輸入」開始說話..."></textarea>
+          
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <button id="micBtn" onclick="toggleVoiceRecognition()" class="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl font-medium text-xs transition shadow-sm">
+              <i data-lucide="mic" class="w-4 h-4"></i>
+              <span id="micBtnText">語音輸入</span>
+            </button>
+            <button onclick="clearAnswer()" class="text-slate-400 hover:text-slate-600 text-xs px-2 py-1">清除內容</button>
+          </div>
+        </div>
+
+        <button id="submitBtn" onclick="submitAnswerForAI()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition shadow-md">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> 提交並進行精準 AI 分析
+        </button>
+      </div>
+
+      <!-- AI Feedback Result (無分數，純點評) -->
+      <div id="aiResultBox" class="hidden bg-white rounded-xl shadow-md border border-indigo-100 p-5 space-y-3">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+          <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官回饋與評語
+          </h3>
+          <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md">精準點評模式</span>
+        </div>
+        <div id="aiFeedbackContent" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 p-4 rounded-xl border border-slate-200">
+          分析中...
+        </div>
+      </div>
+    </div>
+
+    <!-- Teacher View -->
+    <div id="teacherView" class="hidden space-y-4">
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex justify-between items-center">
+        <div>
+          <h2 class="font-bold text-amber-900 text-base flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-5 h-5"></i> 教師管理後台
+          </h2>
+          <p class="text-xs text-amber-700">您可以管理題目、修改密碼或批量匯入題目。</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openPasswordModal()" class="bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition">修改密碼</button>
+          <button onclick="exitTeacherMode()" class="bg-amber-600 text-white hover:bg-amber-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition">返回學生模式</button>
+        </div>
+      </div>
+
+      <!-- Question Controls -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h3 class="font-bold text-slate-700 text-base">題庫管理 (<span id="teacherQCount">0</span>)</h3>
+        <div class="flex items-center gap-2">
+          <button onclick="openBatchModal()" class="bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="layers" class="w-4 h-4"></i> 批量/AI生成
+          </button>
+          <button onclick="openAddModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i> 單條新增
+          </button>
+        </div>
+      </div>
+
+      <!-- Question List -->
+      <div id="teacherQuestionList" class="space-y-2.5"></div>
+    </div>
+  </main>
+
+  <!-- Add/Edit Question Modal -->
+  <div id="qModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-5 space-y-3 shadow-2xl">
+      <h3 id="modalTitle" class="font-bold text-slate-800 text-base">新增問題</h3>
+      <input type="hidden" id="editKey">
+      
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">組別 (Band)</label>
+          <select id="qBand" class="w-full border border-slate-300 rounded-lg p-2 text-xs">
+            <option value="Band 1">Band 1</option>
+            <option value="Band 2">Band 2</option>
+            <option value="Band 3">Band 3</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">語言</label>
+          <select id="qLang" class="w-full border border-slate-300 rounded-lg p-2 text-xs">
+            <option value="中文">中文</option>
+            <option value="English">English</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">題目內容 *</label>
+        <input type="text" id="qTitleInput" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例如：請簡單介紹一下你自己。">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">答題提示 / 說明 (可選)</label>
+        <textarea id="qDescInput" rows="2" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例如：重點分享個人興趣與優點..."></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('qModal')" class="px-3 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-semibold">取消</button>
+        <button onclick="saveQuestion()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold shadow">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch Add Modal -->
+  <div id="batchModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-5 space-y-3 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-slate-800 text-base">批量新增 / AI 生成題目</h3>
+        <button onclick="generateAiQuestions()" id="aiGenBtn" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-90 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI 生成小六題目
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">預設組別</label>
+          <select id="batchBand" class="w-full border border-slate-300 rounded-lg p-2 text-xs">
+            <option value="Band 1">Band 1</option>
+            <option value="Band 2">Band 2</option>
+            <option value="Band 3">Band 3</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">預設語言</label>
+          <select id="batchLang" class="w-full border border-slate-300 rounded-lg p-2 text-xs">
+            <option value="中文">中文</option>
+            <option value="English">English</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">題目列表 (每行一道題)</label>
+        <textarea id="batchInput" rows="5" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="請你介紹一本你最喜歡的書。&#10;如果你獲得一筆獎學金，你會如何使用？"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button onclick="closeModal('batchModal')" class="px-3 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-semibold">取消</button>
+        <button onclick="saveBatchQuestions()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold shadow">確認匯入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Modal -->
+  <div id="pwdModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3 shadow-2xl">
+      <h3 id="pwdTitle" class="font-bold text-slate-800 text-base">教師身分驗證</h3>
+      <input type="password" id="pwdInput" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-indigo-500" placeholder="請輸入教師密碼">
+      <div class="flex justify-end gap-2">
+        <button onclick="closeModal('pwdModal')" class="px-3 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-semibold">取消</button>
+        <button id="pwdSubmitBtn" onclick="verifyPassword()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold shadow">確認</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: 'AIzaSyBr9HlHUsaN-hsE0IZ3iE3ZL94wQtfiPkw',
+      authDomain: 'school-interview-system-33a69.firebaseapp.com',
+      databaseURL: 'https://school-interview-system-33a69-default-rtdb.firebaseio.com',
+      projectId: 'school-interview-system-33a69',
+      storageBucket: 'school-interview-system-33a69.firebasestorage.app',
+      messagingSenderId: '476705555407',
+      appId: '1:476705555407:web:3cfd4e809ce7d5e3e048ba'
+    };
+
+    let db = null;
+    let questions = {};
+    let currentQKey = null;
+    let isTeacher = false;
+    let teacherPassword = '1234';
+    let recognition = null;
+    let isRecording = false;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initFirebase();
+      setupSpeechRecognition();
+    });
+
+    function initFirebase() {
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.database();
+        
+        db.ref('questions').on('value', (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            questions = data;
+          } else {
+            seedDefaultQuestions();
+          }
+          renderQuestions();
+          document.getElementById('connectionStatus').classList.remove('bg-amber-600');
+          document.getElementById('connectionStatus').classList.add('bg-indigo-700');
+          document.getElementById('statusText').innerText = '雲端資料庫已連線';
+        }, (err) => {
+          console.warn('Firebase Error:', err);
+          fallbackLocalMode();
+        });
+
+        db.ref('teacher_password').on('value', (snapshot) => {
+          if (snapshot.exists()) teacherPassword = snapshot.val();
+        });
+
+      } catch (e) {
+        console.warn('Firebase Config Error:', e);
+        fallbackLocalMode();
+      }
+    }
+
+    function fallbackLocalMode() {
+      document.getElementById('connectionStatus').classList.remove('bg-indigo-700');
+      document.getElementById('connectionStatus').classList.add('bg-amber-600');
+      document.getElementById('statusText').innerText = '離線/單機模式';
+      
+      const localQ = localStorage.getItem('local_questions');
+      if (localQ) {
+        questions = JSON.parse(localQ);
+      } else {
+        seedDefaultQuestions();
+      }
+      renderQuestions();
+    }
+
+    function seedDefaultQuestions() {
+      const defaults = {
+        'q1': { title: '請簡單介紹一下你自己的興趣與優點。', desc: '著重說明自己的獨特個人特色、閱讀偏好或課外活動。', band: 'Band 1', lang: '中文' },
+        'q2': { title: 'If you encounter a difficult problem during group project, how will you solve it?', desc: 'Explain teamwork and problem-solving skills clearly.', band: 'Band 1', lang: 'English' },
+        'q3': { title: '你平時最喜歡的一門科目是什麼？為什麼？', desc: '舉出具體的學習實例說明理由。', band: 'Band 2', lang: '中文' }
+      };
+      questions = defaults;
+      syncQuestions();
+    }
+
+    function syncQuestions() {
+      if (db) db.ref('questions').set(questions);
+      localStorage.setItem('local_questions', JSON.stringify(questions));
+      renderQuestions();
+    }
+
+    function renderQuestions() {
+      const select = document.getElementById('questionSelect');
+      const teacherList = document.getElementById('teacherQuestionList');
+      select.innerHTML = '<option value="">-- 請選擇題目 --</option>';
+      teacherList.innerHTML = '';
+
+      const keys = Object.keys(questions);
+      document.getElementById('questionCountBadge').innerText = `${keys.length} 道題目`;
+      document.getElementById('teacherQCount').innerText = keys.length;
+
+      keys.forEach((key) => {
+        const q = questions[key];
+        
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.innerText = `[${q.band}][${q.lang}] ${q.title}`;
+        select.appendChild(opt);
+
+        const card = document.createElement('div');
+        card.className = 'bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2';
+        card.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2 py-0.5 rounded font-bold bg-indigo-100 text-indigo-700">${q.band}</span>
+              <span class="text-xs px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-700">${q.lang}</span>
+              <h4 class="font-bold text-slate-800 text-xs sm:text-sm">${q.title}</h4>
+            </div>
+            ${q.desc ? `<p class="text-xs text-slate-500">${q.desc}</p>` : ''}
+          </div>
+          <div class="flex items-center gap-2 self-end sm:self-center">
+            <button onclick="editQuestion('${key}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1 rounded-lg transition font-medium">編輯</button>
+            <button onclick="deleteQuestion('${key}')" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg transition font-medium">刪除</button>
+          </div>
+        `;
+        teacherList.appendChild(card);
+      });
+
+      if (currentQKey && questions[currentQKey]) {
+        selectQuestion(currentQKey);
+      }
+    }
+
+    function selectQuestion(key) {
+      currentQKey = key;
+      const box = document.getElementById('currentQuestionBox');
+      const answerArea = document.getElementById('answerArea');
+      
+      if (!key || !questions[key]) {
+        box.classList.add('hidden');
+        answerArea.classList.add('hidden');
+        return;
+      }
+
+      const q = questions[key];
+      document.getElementById('qBandBadge').innerText = q.band;
+      document.getElementById('qLangBadge').innerText = q.lang;
+      document.getElementById('currentQuestionTitle').innerText = q.title;
+      document.getElementById('currentQuestionDesc').innerText = q.desc || '無補充說明';
+      
+      box.classList.remove('hidden');
+      answerArea.classList.remove('hidden');
+      document.getElementById('aiResultBox').classList.add('hidden');
+    }
+
+    function setupSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        document.getElementById('micBtn').disabled = true;
+        document.getElementById('micBtnText').innerText = '瀏覽器不支援語音';
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'zh-HK';
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript;
+        }
+        document.getElementById('studentAnswer').value = transcript;
+      };
+
+      recognition.onerror = () => stopVoiceRecognition();
+      recognition.onend = () => stopVoiceRecognition();
+    }
+
+    function toggleVoiceRecognition() {
+      if (!recognition) {
+        alert('您的瀏覽器不支援 Web Speech 語音輸入，請嘗試使用 Google Chrome 或 Edge 瀏覽器。');
+        return;
+      }
+
+      if (isRecording) {
+        recognition.stop();
+        stopVoiceRecognition();
+      } else {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(() => startListening())
+            .catch(() => alert('無法獲取麥克風權限！請確定瀏覽器授權選項已開啓。'));
+        } else {
+          startListening();
+        }
+      }
+    }
+
+    function startListening() {
+      if (currentQKey && questions[currentQKey] && questions[currentQKey].lang === 'English') {
+        recognition.lang = 'en-US';
+      } else {
+        recognition.lang = 'zh-HK';
+      }
+      try {
+        recognition.start();
+        isRecording = true;
+        document.getElementById('micBtn').classList.add('recording-pulse');
+        document.getElementById('micBtnText').innerText = '聆聽中... (點擊停止)';
+      } catch (e) {}
+    }
+
+    function stopVoiceRecognition() {
+      isRecording = false;
+      document.getElementById('micBtn').classList.remove('recording-pulse');
+      document.getElementById('micBtnText').innerText = '語音輸入';
+    }
+
+    function clearAnswer() {
+      document.getElementById('studentAnswer').value = '';
+    }
+
+    // 免 API Key 的精準邏輯分析引擎
+    function submitAnswerForAI() {
+      const ans = document.getElementById('studentAnswer').value.trim();
+      if (!ans) {
+        alert('請先輸入或語音錄製答案！');
+        return;
+      }
+
+      const q = questions[currentQKey];
+      const resultBox = document.getElementById('aiResultBox');
+      const content = document.getElementById('aiFeedbackContent');
+
+      resultBox.classList.remove('hidden');
+      content.innerText = '⏳ AI 面試官正在詳細分析你的答題內容，請稍候...';
+
+      setTimeout(() => {
+        const isEnglish = q.lang === "English";
+        
+        // 亂答 / 敷衍 判定條件
+        const isTooShort = ans.length < 8;
+        const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
+        const isRepeated = /(.)\1{4,}/.test(ans);
+        const isOffTopic = ans.includes("不知道") || ans.includes("冇") || ans.includes("無") || ans.includes("don't know") || ans.includes("no");
+
+        let feedback = "";
+
+        if (isEnglish) {
+          // 英文題目點評
+          if (isTooShort || isGibberish || isRepeated || isOffTopic) {
+            feedback = `🟢 Strengths:
+• Attempted to provide an answer.
+
+🔴 Areas for Improvement:
+• The response is too brief, irrelevant, or contains nonsensical characters.
+• Failing to provide a structured answer for "${q.title}" shows a lack of preparation in a formal interview setting.
+
+💡 Suggestions & Sample Answer:
+• Always answer in full sentences and support your points with reasons.
+• Sample Answer: "I would approach this by discussing the problem calmly with my group members and finding a mutual compromise that works for everyone."`;
+          } else {
+            feedback = `🟢 Strengths:
+• Responded directly to the topic of "${q.title}".
+• Good attempt in using English to express personal thoughts clearly.
+
+🔴 Areas for Improvement:
+• The answer could be enriched by including personal anecdotes or practical examples.
+• Try to elaborate more on "why" and "how" to make your answer more convincing.
+
+💡 Suggestions & Sample Answer:
+• Use the PREP method (Point, Reason, Example, Point) to structure your interview response.
+• Sample Answer: "In my opinion, effective communication is key. For example, during a science project last year, we listened to each other's views and successfully divided the workload."`;
+          }
+        } else {
+          // 中文題目點評
+          if (isTooShort || isGibberish || isRepeated || isOffTopic) {
+            feedback = `🟢 優點 (Strengths)：
+• 學生嘗試進行了輸入作答。
+
+🔴 缺點與改進空間 (Areas for Improvement)：
+• 回答內容過於簡短、偏離主題或含有無意義的字元。
+• 未有針對題目「${q.title}」提供實質內容。在正式升中面試中，這樣的回答會被視為準備不足或缺乏態度。
+
+💡 具體建議與示範回答 (Suggestions & Sample Answer)：
+• 建議使用完整句子作答，並包含「回答觀點 ＋ 理由 ＋ 具體例子」三大關鍵要素。
+• 參考示範：可以先直接回答「我最喜歡的科目是……」，然後接著說「因為這門科目讓我學會了……，例如在上學期的小組合作中……」。`;
+          } else {
+            feedback = `🟢 優點 (Strengths)：
+• 切合題目「${q.title}」的主旨，語意表達流暢。
+• 態度積極誠懇，展現出高年級小學生應有的表達能力。
+
+🔴 缺點與改進空間 (Areas for Improvement)：
+• 答案內容稍顯通用，可以加入更多「個人獨特體驗」或「具體例子」來加深面試官的印象。
+• 建議多使用結構化連接詞（如：第一、此外、總括而言），令邏輯層次更分明。
+
+💡 具體建議與示範回答 (Suggestions & Sample Answer)：
+• 建議採用「STAR 原則」（情境、任務、行動、結果）來說明經歷。
+• 參考示範：試著回想一次小學校園生活或課外活動的真實片段，並具體分享你在當中的體會與收穫。`;
+          }
+        }
+
+        content.innerText = feedback;
+      }, 1000);
+    }
+
+    function toggleModePrompt() {
+      if (isTeacher) {
+        exitTeacherMode();
+      } else {
+        document.getElementById('pwdTitle').innerText = '教師身份登入';
+        document.getElementById('pwdInput').value = '';
+        document.getElementById('pwdModal').classList.remove('hidden');
+      }
+    }
+
+    function verifyPassword() {
+      const val = document.getElementById('pwdInput').value;
+      if (val === teacherPassword) {
+        isTeacher = true;
+        closeModal('pwdModal');
+        document.getElementById('studentView').classList.add('hidden');
+        document.getElementById('teacherView').classList.remove('hidden');
+        document.getElementById('modeText').innerText = '退出教師模式';
+      } else {
+        alert('密碼不正確！');
+      }
+    }
+
+    function exitTeacherMode() {
+      isTeacher = false;
+      document.getElementById('teacherView').classList.add('hidden');
+      document.getElementById('studentView').classList.remove('hidden');
+      document.getElementById('modeText').innerText = '教師登入';
+    }
+
+    function openPasswordModal() {
+      const newPwd = prompt('請輸入新的教師密碼：');
+      if (newPwd && newPwd.trim().length > 0) {
+        teacherPassword = newPwd.trim();
+        if (db) db.ref('teacher_password').set(teacherPassword);
+        alert('密碼修改成功！');
+      }
+    }
+
+    function openAddModal() {
+      document.getElementById('modalTitle').innerText = '新增問題';
+      document.getElementById('editKey').value = '';
+      document.getElementById('qTitleInput').value = '';
+      document.getElementById('qDescInput').value = '';
+      document.getElementById('qModal').classList.remove('hidden');
+    }
+
+    function editQuestion(key) {
+      const q = questions[key];
+      document.getElementById('modalTitle').innerText = '編輯問題';
+      document.getElementById('editKey').value = key;
+      document.getElementById('qBand').value = q.band || 'Band 1';
+      document.getElementById('qLang').value = q.lang || '中文';
+      document.getElementById('qTitleInput').value = q.title;
+      document.getElementById('qDescInput').value = q.desc || '';
+      document.getElementById('qModal').classList.remove('hidden');
+    }
+
+    function saveQuestion() {
+      const key = document.getElementById('editKey').value || `q_${Date.now()}`;
+      const title = document.getElementById('qTitleInput').value.trim();
+      const desc = document.getElementById('qDescInput').value.trim();
+      const band = document.getElementById('qBand').value;
+      const lang = document.getElementById('qLang').value;
+
+      if (!title) {
+        alert('請輸入題目內容！');
+        return;
+      }
+
+      questions[key] = { title, desc, band, lang };
+      syncQuestions();
+      closeModal('qModal');
+    }
+
+    function deleteQuestion(key) {
+      if (confirm('確定要刪除這道題目嗎？')) {
+        delete questions[key];
+        syncQuestions();
+      }
+    }
+
+    function openBatchModal() {
+      document.getElementById('batchInput').value = '';
+      document.getElementById('batchModal').classList.remove('hidden');
+    }
+
+    function generateAiQuestions() {
+      const band = document.getElementById('batchBand').value;
+      const lang = document.getElementById('batchLang').value;
+      const btn = document.getElementById('aiGenBtn');
+      
+      btn.innerText = '生成中...';
+      setTimeout(() => {
+        let aiResults = [];
+        if (lang === 'English') {
+          aiResults = [
+            'What is your favorite book and what did you learn from it?',
+            'How do you handle stress when preparing for examinations?',
+            'If you could change one school rule, what would it be and why?'
+          ];
+        } else {
+          aiResults = [
+            '請分享一次你克服困難或挫敗的經驗，並談談你的學習。',
+            '如果你有機會設計一堂全新的學校課程，你會想設計什麼主題？',
+            '談談你最崇拜的人或榜樣，他對你產生了什麼影響？'
+          ];
+        }
+        document.getElementById('batchInput').value = aiResults.join('\n');
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI 生成小六題目`;
+        lucide.createIcons();
+      }, 1000);
+    }
+
+    function saveBatchQuestions() {
+      const lines = document.getElementById('batchInput').value.split('\n');
+      const band = document.getElementById('batchBand').value;
+      const lang = document.getElementById('batchLang').value;
+
+      lines.forEach((line) => {
+        const text = line.trim();
+        if (text) {
+          const key = `q_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+          questions[key] = { title: text, desc: '', band: band, lang: lang };
+        }
+      });
+
+      syncQuestions();
+      closeModal('batchModal');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
