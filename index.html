@@ -43,7 +43,7 @@
       <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
         <div>
           <h2 class="font-bold text-indigo-900 text-lg">🎓 學生練習區</h2>
-          <p class="text-xs text-indigo-700">選擇題目後，可嘗試自主回答或點擊「觀看 AI 建議答案」學習詳細高分答題架構！</p>
+          <p class="text-xs text-indigo-700">選擇題目後，可以使用語音或文字回答，AI 將提供精準評語與詳細作答例子！</p>
         </div>
         <span class="text-xs bg-indigo-200 text-indigo-800 px-2.5 py-1 rounded-md font-medium" id="questionCountBadge">0 道題目</span>
       </div>
@@ -71,11 +71,10 @@
           <h3 id="currentQuestionTitle" class="text-lg font-bold text-slate-800 leading-snug">--</h3>
           <p id="currentQuestionDesc" class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">--</p>
 
-          <!-- 💡 詳盡 AI 建議答案展示區塊 -->
           <div id="sampleAnswerBox" class="hidden bg-amber-50/90 border border-amber-200 rounded-xl p-4 space-y-3 transition shadow-sm">
             <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs border-b border-amber-200 pb-2">
               <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
-              <span>AI 面試官高分建議答案與答題步驟解析</span>
+              <span>AI 面試官建議答案與答題框架</span>
             </div>
             <div id="sampleAnswerContent" class="text-xs text-amber-950 leading-relaxed whitespace-pre-wrap">--</div>
           </div>
@@ -101,17 +100,17 @@
         </div>
 
         <button id="submitBtn" onclick="submitAnswerForAI()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition shadow-md">
-          <i data-lucide="sparkles" class="w-4 h-4"></i> 提交並進行深度 AI 比對分析
+          <i data-lucide="sparkles" class="w-4 h-4"></i> 提交並進行深度 AI 分析
         </button>
       </div>
 
-      <!-- AI Feedback Result -->
+      <!-- AI Feedback Result (含詳細作答例子) -->
       <div id="aiResultBox" class="hidden bg-white rounded-xl shadow-md border border-indigo-100 p-5 space-y-3">
         <div class="flex justify-between items-center border-b border-slate-100 pb-2">
           <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
             <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官深度分析點評
           </h3>
-          <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md">多維度語意檢測</span>
+          <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md">附詳細高分作答例子</span>
         </div>
         <div id="aiFeedbackContent" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 p-4 rounded-xl border border-slate-200">
           分析中...
@@ -404,7 +403,6 @@
       document.getElementById('aiResultBox').classList.add('hidden');
     }
 
-    // 🌟 全面升級：詳盡高分 AI 建議答案與結構拆解
     function toggleSampleAnswer() {
       const sampleBox = document.getElementById('sampleAnswerBox');
       const btnText = document.getElementById('sampleBtnText');
@@ -415,7 +413,7 @@
         const isEnglish = q.lang === "English";
         let sampleContent = "";
 
-        if (q.desc && q.desc.trim().length > 0 && q.desc.includes("【高分示範答案】")) {
+        if (q.desc && q.desc.trim().length > 0 && q.desc.includes("示範答案")) {
           sampleContent = q.desc;
         } else {
           sampleContent = generateDetailedSample(q.title, q.band, isEnglish);
@@ -430,38 +428,37 @@
       }
     }
 
-    // 動態生成結構化詳盡範本核心函式
+    // 生成高品質具體示範答案核心
     function generateDetailedSample(title, band, isEnglish) {
       if (isEnglish) {
-        return `📌 【解題邏輯與 PREP 結構】：
-1. Point (核心觀點)：直接回應題目「${title}」，展現自信與積極態度。
-2. Reason (背後理由)：說明為何你具備此優點、興趣或能力。
-3. Example (個人實例)：講述一個具體的小學故事（如專題小組、校隊比賽、擔任班長）。
-4. Point (總結延伸)：連結到中學生活，強調未來的學習熱情。
+        return `📌 【Recommended Structure (PREP Model)】:
+• Point: Directly answer the question "${title}".
+• Reason: Explain why this point is important to you.
+• Example: Share a realistic primary school experience.
+• Point: Summarize and express enthusiasm for secondary school.
 
-📝 【Band 1 高分示範答案範本】：
-"Thank you for asking this question. Regarding '${title}', I believe the key lies in taking active initiative and continuous self-improvement. 
+📝 【Band 1 High-Score Sample Answer】:
+"Thank you for asking this question. In response to '${title}', I strongly believe that taking initiative and keeping a positive attitude are essential.
 
-For instance, during our school science exhibition last term, our team faced a severe challenge when our bridge model collapsed just two days before the deadline. As the group coordinator, I immediately arranged an emergency meeting, encouraged my teammates, and divided the workload efficiently to rebuild the structure. In the end, we won the 'Best Teamwork Award'. 
+For instance, during our primary school science project last term, our team encountered a huge difficulty when our experiment failed right before the deadline. As the team coordinator, I immediately encouraged my teammates, listened to everyone's ideas, and redistributed our tasks to rerun the experiment. Eventually, we successfully presented our project and earned positive remarks from our teachers.
 
-This experience taught me the importance of resilience and active communication under pressure. If accepted into your esteemed school, I will definitely bring this positive mindset and contribute to the school community."`;
+This experience taught me the value of perseverance and effective communication under pressure. I look forward to bringing this proactive spirit to your school and taking on new academic challenges."`;
       } else {
-        return `📌 【解題邏輯與 STAR 原則拆解】：
-1. S (Situation 情境)：點出題目「${title}」發生的背景與個人核心觀點。
-2. T (Task 任務)：當時面臨的需求、挑戰或需要達成的目標。
-3. A (Action 行動)：你具體採取了什麼關鍵行動（體現主動性與溝通力）。
-4. R (Result 結果與學習)：最終獲得的成功結果以及對你個人成長的啟發。
+        return `📌 【推薦答題結構 (STAR 原則)】：
+• S (情境)：開門見山回答題目「${title}」的核心觀點。
+• T (任務)：說明當時在學校或生活中面對的挑戰或任務。
+• A (行動)：具體分享你採取了什麼行動（溝通、領導、主動學習）。
+• R (結果)：最後獲得的成果與對個人成長的啟發。
 
-📝 【高分示範答案範本】：
-「各位面試官老師好！針對『${title}』這個課題，我的看法是：良好的學習習慣與積極的團隊溝通是解決任何問題的關鍵。
+📝 【高分作答範例】：
+「各位面試官老師好！針對『${title}』這個題目，我的核心看法是：保持積極主動的學習態度與同理心溝通，是克服任何困難的關鍵。
 
-以我自己小學六年的經歷為例，在上一學期的專題研習活動中，我們組遇到主題意見分歧、進度停滯的困難。當時我主動擔任協調角色，建議大家先列表整理各自方案的優缺點，並採用民主投票的方式達成共識。最後，我們組不僅按時繳交報告，還獲得了全班最高分。
+以我自己小學六年的經驗為例，在上一學期的專題研習活動中，我們小組遇到了時間緊迫且成員意見分歧的挑戰。當時我主動擔任協調者，建議大家先列表分析各自方案的優缺點，並採用民主投票達成共識。最終，我們組不僅按時繳交報告，更獲得了全班最高分的優異成績。
 
-這次經歷讓我深切體會到，面對挑戰時，保持冷靜、同理心溝通比執著於個人意見更為重要。這也是我一直努力保持的優點，希望能將這份積極學習與合作的精神帶入貴校的中學生活。」`;
+這次經歷讓我深切體會到，面對挑戰時，冷靜溝通比執著於個人意見更重要。這也是我一直持有的優點，希望能將這份熱情帶入貴校的中學生活。」`;
       }
     }
 
-    // 教師端點擊生成詳細參考答案
     function teacherGenerateAiAnswer() {
       const title = document.getElementById('qTitleInput').value.trim();
       const band = document.getElementById('qBand').value;
@@ -551,7 +548,7 @@ This experience taught me the importance of resilience and active communication 
       document.getElementById('studentAnswer').value = '';
     }
 
-    // 深度多維度語意分析引擎
+    // 🌟 深度多維度語意分析引擎 (評語時直接附上該題目的詳細作答例子)
     function submitAnswerForAI() {
       const ans = document.getElementById('studentAnswer').value.trim();
       if (!ans) {
@@ -575,14 +572,15 @@ This experience taught me the importance of resilience and active communication 
         const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
         const isRefusal = ans.includes("不知道") || ans.includes("冇") || ans.includes("無") || ans.includes("don't know") || ans.includes("no idea");
 
+        const sampleText = generateDetailedSample(q.title, q.band, isEnglish);
+
         if (isTooShort || isGibberish || isRefusal) {
           content.innerText = isEnglish
-            ? `🟢 Strengths:\n• Entered a response in the text area.\n\n🔴 Areas for Improvement:\n• The answer is too brief, nonsensical, or states a refusal to answer.\n• Failing to address "${q.title}" with meaningful content shows a lack of preparation.\n\n💡 Suggestions & Sample Framework:\n• Always answer in full sentences using the PREP structure (Point, Reason, Example, Point).`
-            : `🟢 優點 (Strengths)：\n• 學生嘗試進行了輸入作答。\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n• 回答內容過短（未滿10字）、含有無意義字元或屬於拒絕回答（如「不知道」）。\n• 完全未針對題目「${q.title}」展開說明，在升中面試中會被扣減態度分數。\n\n💡 具體建議與答題框架：\n• 面試切忌直接說「不知道」，請採用 STAR 原則（情境 ➔ 任務 ➔ 行動 ➔ 結果）完整回答。`;
+            ? `🟢 Strengths:\n• Entered a response in the text area.\n\n🔴 Areas for Improvement:\n• The answer is too brief, nonsensical, or states a refusal to answer.\n• Failing to address "${q.title}" with meaningful content shows a lack of preparation.\n\n💡 Suggestions & High-Score Sample Answer:\n${sampleText}`
+            : `🟢 優點 (Strengths)：\n• 學生嘗試進行了輸入作答。\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n• 回答內容過短（未滿10字）、含有無意義字元或屬於拒絕回答（如「不知道」）。\n• 完全未針對題目「${q.title}」展開說明，在升中面試中會被扣減態度分數。\n\n💡 具體建議與針對本題的高分作答例子：\n${sampleText}`;
           return;
         }
 
-        // 主題關鍵詞相關性比對
         const keywordSets = [
           { keys: ["興趣", "優點", "自介", "介紹", "hobby", "strength", "introduce", "myself"], topic: "個人特質" },
           { keys: ["書", "閱讀", "喜歡", "作者", "主角", "book", "read", "author", "story"], topic: "閱讀心得" },
@@ -625,8 +623,6 @@ This experience taught me the importance of resilience and active communication 
           if (hasLogic) strengths.push(`• Well-structured sentence organization using logical connectors.`);
           else weaknesses.push(`• Sentence structures could be improved by using connective words (e.g., 'Because', 'Therefore', 'For instance').`);
 
-          suggestions.push(`• Apply the **PREP Formula**: **P**oint (State main idea) ➔ **R**eason (Explain why) ➔ **E**xample (Give a real story) ➔ **P**oint (Restate main idea).`);
-
         } else {
           if (hasRelevantWords) strengths.push(`• 回答緊扣題目「${q.title}」的核心主題，沒有離題。`);
           else weaknesses.push(`• 答案中缺少與「${q.title}」直接相關的核心關鍵詞，給人偏題或套用通用模板的感覺。`);
@@ -638,16 +634,14 @@ This experience taught me the importance of resilience and active communication 
           else weaknesses.push(`• 缺乏具體的個人生活事例或學習經驗支撐，使回答顯得較為空洞泛談。`);
 
           if (hasLogic) strengths.push(`• 邏輯層次分明，能夠善用「因為、所以、此外」等連接詞結構化表達。`);
-          else weaknesses.push(`• 句式結構較為單一，建議多使用關聯詞（如：第一……此外……總結來說……）強化條理性。`);
-
-          suggestions.push(`• 建議採用 **「STAR 原則」** 敘述經驗：Situation(情境) ➔ Task(任務) ➔ Action(行動) ➔ Result(結果與學習)。`);
+          else weaknesses.push(`• 句式結構較為單一，建議多使用關聯詞（如：第一……此外……總括來說……）強化條理性。`);
         }
 
         let finalOutput = "";
         if (isEnglish) {
-          finalOutput = `🟢 Strengths:\n${strengths.join("\n") || "• Attempted to answer in English."}\n\n🔴 Areas for Improvement:\n${weaknesses.join("\n") || "• Minor adjustments needed for better vocabulary fluency."}\n\n💡 Specific Suggestions & Framework:\n${suggestions.join("\n")}`;
+          finalOutput = `🟢 Strengths:\n${strengths.join("\n") || "• Attempted to answer in English."}\n\n🔴 Areas for Improvement:\n${weaknesses.join("\n") || "• Minor adjustments needed for better vocabulary fluency."}\n\n💡 Suggestions & High-Score Sample Answer:\n${sampleText}`;
         } else {
-          finalOutput = `🟢 優點 (Strengths)：\n${strengths.join("\n") || "• 具備基本答題意願。"}\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n${weaknesses.join("\n") || "• 表達流暢，可進一步深化細節。"}\n\n💡 具體建議與答題框架 (Suggestions & Framework)：\n${suggestions.join("\n")}`;
+          finalOutput = `🟢 優點 (Strengths)：\n${strengths.join("\n") || "• 具備基本答題意願。"}\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n${weaknesses.join("\n") || "• 表達流暢，可進一步深化細節。"}\n\n💡 具體建議與針對本題的高分作答例子：\n${sampleText}`;
         }
 
         content.innerText = finalOutput;
