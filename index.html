@@ -42,15 +42,32 @@
     <div id="studentView" class="space-y-4 hidden">
       <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
         <div>
-          <h2 class="font-bold text-indigo-900 text-lg">🎓 學生練習區</h2>
+          <h2 class="font-bold text-indigo-900 text-lg">🎓 聖馬太學生練習區</h2>
           <p class="text-xs text-indigo-700">選擇題目後，可以使用語音或文字回答，AI 將提供精準評語與詳細作答例子！</p>
         </div>
         <span class="text-xs bg-indigo-200 text-indigo-800 px-2.5 py-1 rounded-md font-medium" id="questionCountBadge">0 道題目</span>
       </div>
 
-      <!-- Question Selection & Display -->
+      <!-- Question Selection & Band Filter -->
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
+        <!-- 🌟 Band 篩選按鈕區 -->
+        <div class="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-3">
+          <span class="text-xs font-bold text-slate-500 mr-1">組別分類：</span>
+          <button onclick="setBandFilter('ALL')" id="filterBtnALL" class="band-filter-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow-sm">
+            全部題目
+          </button>
+          <button onclick="setBandFilter('Band 1')" id="filterBtnBand1" class="band-filter-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+            Band 1
+          </button>
+          <button onclick="setBandFilter('Band 2')" id="filterBtnBand2" class="band-filter-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+            Band 2
+          </button>
+          <button onclick="setBandFilter('Band 3')" id="filterBtnBand3" class="band-filter-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+            Band 3
+          </button>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <label class="text-sm font-semibold text-slate-600">選擇面試題目：</label>
           <select id="questionSelect" onchange="selectQuestion(this.value)" class="w-full sm:w-auto flex-1 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <option value="">載入中...</option>
@@ -151,14 +168,14 @@
     </div>
   </main>
 
-  <!-- Student Login Modal (學生登入彈窗) -->
+  <!-- Student Login Modal -->
   <div id="studentLoginModal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl text-center">
       <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto">
         <i data-lucide="lock" class="w-6 h-6"></i>
       </div>
       <div>
-        <h3 class="font-bold text-slate-800 text-lg">學生登入驗證</h3>
+        <h3 class="font-bold text-slate-800 text-lg">聖馬太學生登入驗證</h3>
         <p class="text-xs text-slate-500 mt-1">請輸入老師提供的學生練習密碼以進入系統。</p>
       </div>
       <input type="password" id="studentPwdInput" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none text-center tracking-widest" placeholder="請輸入學生密碼" onkeypress="if(event.key==='Enter') verifyStudentPassword()">
@@ -282,7 +299,8 @@
     let currentQKey = null;
     let isTeacher = false;
     let teacherPassword = '1234';
-    let studentPassword = 'student123'; // 預設學生登入密碼
+    let studentPassword = 'stmatthew';
+    let currentBandFilter = 'ALL'; // 當前選中的 Band 篩選
     let recognition = null;
     let isRecording = false;
 
@@ -386,6 +404,26 @@
       renderQuestions();
     }
 
+    // 🌟 核心升級：支援按 Band 即時過濾題目
+    function setBandFilter(band) {
+      currentBandFilter = band;
+      
+      // 更新按鈕樣式
+      document.querySelectorAll('.band-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+        btn.classList.add('bg-slate-100', 'text-slate-600');
+      });
+
+      const activeBtnId = band === 'ALL' ? 'filterBtnALL' : `filterBtn${band.replace(' ', '')}`;
+      const activeBtn = document.getElementById(activeBtnId);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+        activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+      }
+
+      renderQuestions();
+    }
+
     function renderQuestions() {
       const select = document.getElementById('questionSelect');
       const teacherList = document.getElementById('teacherQuestionList');
@@ -393,17 +431,27 @@
       teacherList.innerHTML = '';
 
       const keys = Object.keys(questions);
-      document.getElementById('questionCountBadge').innerText = `${keys.length} 道題目`;
       document.getElementById('teacherQCount').innerText = keys.length;
 
-      keys.forEach((key) => {
+      let filteredKeys = keys;
+      if (currentBandFilter !== 'ALL') {
+        filteredKeys = keys.filter(k => questions[k].band === currentBandFilter);
+      }
+
+      document.getElementById('questionCountBadge').innerText = `${filteredKeys.length} 道題目`;
+
+      // 渲染學生端下拉選單
+      filteredKeys.forEach((key) => {
         const q = questions[key];
-        
         const opt = document.createElement('option');
         opt.value = key;
         opt.innerText = `[${q.band}][${q.lang}] ${q.title}`;
         select.appendChild(opt);
+      });
 
+      // 渲染教師端全部列表
+      keys.forEach((key) => {
+        const q = questions[key];
         const card = document.createElement('div');
         card.className = 'bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2';
         card.innerHTML = `
@@ -423,8 +471,10 @@
         teacherList.appendChild(card);
       });
 
-      if (currentQKey && questions[currentQKey]) {
-        selectQuestion(currentQKey);
+      if (currentQKey && questions[currentQKey] && (currentBandFilter === 'ALL' || questions[currentQKey].band === currentBandFilter)) {
+        select.value = currentQKey;
+      } else {
+        selectQuestion('');
       }
     }
 
@@ -504,7 +554,7 @@ This experience taught me the value of perseverance and effective communication 
 
 以我自己小學六年的經驗為例，在上一學期的專題研習活動中，我們小組遇到了時間緊迫且成員意見分歧的挑戰。當時我主動擔任協調者，建議大家先列表分析各自方案的優缺點，並採用民主投票達成共識。最終，我們組不僅按時繳交報告，更獲得了全班最高分的優異成績。
 
-這次經歷讓我深切體會到，面對挑戰時，冷靜溝通比執著於個人意見更重要。這也是我一直持有的優勢，希望能將這份熱情帶入貴校的中學生活。」`;
+這次經歷讓我深切體會到，面對挑戰時，冷靜溝通比執著於個人意見更重要。這也是我一直持有的優越品質，希望能將這份熱情帶入貴校的中學生活。」`;
       }
     }
 
