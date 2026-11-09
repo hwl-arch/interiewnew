@@ -43,14 +43,14 @@
       <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
         <div>
           <h2 class="font-bold text-indigo-900 text-lg">🎓 聖馬太學生練習區</h2>
-          <p class="text-xs text-indigo-700">選擇題目後，可以使用語音或文字回答，AI 將提供精準評語與詳細作答例子！</p>
+          <p class="text-xs text-indigo-700">選擇題目後，可以使用語音或文字回答，也可點擊「🔊 語音朗讀」收聽示範！</p>
         </div>
         <span class="text-xs bg-indigo-200 text-indigo-800 px-2.5 py-1 rounded-md font-medium" id="questionCountBadge">0 道題目</span>
       </div>
 
       <!-- Question Selection & Band Filter -->
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
-        <!-- 🌟 Band 篩選按鈕區 -->
+        <!-- Band 篩選按鈕區 -->
         <div class="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-3">
           <span class="text-xs font-bold text-slate-500 mr-1">組別分類：</span>
           <button onclick="setBandFilter('ALL')" id="filterBtnALL" class="band-filter-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow-sm">
@@ -89,9 +89,15 @@
           <p id="currentQuestionDesc" class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">--</p>
 
           <div id="sampleAnswerBox" class="hidden bg-amber-50/90 border border-amber-200 rounded-xl p-4 space-y-3 transition shadow-sm">
-            <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs border-b border-amber-200 pb-2">
-              <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
-              <span>AI 面試官建議答案與答題框架</span>
+            <div class="flex items-center justify-between border-b border-amber-200 pb-2">
+              <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
+                <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
+                <span>AI 面試官建議答案與答題框架</span>
+              </div>
+              <!-- 🔊 建議答案語音朗讀按鈕 -->
+              <button onclick="speakText('sampleAnswerContent')" id="speakSampleBtn" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition shadow-sm">
+                <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 朗讀建議答案
+              </button>
             </div>
             <div id="sampleAnswerContent" class="text-xs text-amber-950 leading-relaxed whitespace-pre-wrap">--</div>
           </div>
@@ -127,7 +133,13 @@
           <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
             <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官深度分析點評
           </h3>
-          <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md">附詳細高分作答例子</span>
+          <div class="flex items-center gap-2">
+            <!-- 🔊 評語語音朗讀按鈕 -->
+            <button onclick="speakText('aiFeedbackContent')" id="speakFeedbackBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition shadow-sm">
+              <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 朗讀評語與範例
+            </button>
+            <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md hidden sm:inline-block">附詳細高分作答例子</span>
+          </div>
         </div>
         <div id="aiFeedbackContent" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 p-4 rounded-xl border border-slate-200">
           分析中...
@@ -300,7 +312,7 @@
     let isTeacher = false;
     let teacherPassword = '1234';
     let studentPassword = 'stmatthew';
-    let currentBandFilter = 'ALL'; // 當前選中的 Band 篩選
+    let currentBandFilter = 'ALL';
     let recognition = null;
     let isRecording = false;
 
@@ -310,6 +322,34 @@
       setupSpeechRecognition();
       checkStudentAuth();
     });
+
+    // 🌟 文字轉語音 (TTS) 朗讀功能
+    function speakText(elementId) {
+      if (!('speechSynthesis' in window)) {
+        alert('您的瀏覽器不支援語音朗讀功能。');
+        return;
+      }
+
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        return;
+      }
+
+      const text = document.getElementById(elementId).innerText;
+      if (!text || text === '--' || text.includes('分析中')) return;
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      const q = questions[currentQKey];
+
+      if (q && q.lang === 'English') {
+        utterance.lang = 'en-US';
+      } else {
+        utterance.lang = 'zh-HK'; // 預設廣東話朗讀
+      }
+      utterance.rate = 0.9; // 微調朗讀速度，適合學習
+
+      window.speechSynthesis.speak(utterance);
+    }
 
     function checkStudentAuth() {
       const isStudentLoggedIn = sessionStorage.getItem('student_authed');
@@ -350,7 +390,7 @@
           renderQuestions();
           document.getElementById('connectionStatus').classList.remove('bg-amber-600');
           document.getElementById('connectionStatus').classList.add('bg-indigo-700');
-          document.getElementById('statusText').innerText = '雲端資料庫已連線';
+          document.getElementById('statusText').innerText = '資料庫同步中';
         }, (err) => {
           console.warn('Firebase Error:', err);
           fallbackLocalMode();
@@ -404,11 +444,9 @@
       renderQuestions();
     }
 
-    // 🌟 核心升級：支援按 Band 即時過濾題目
     function setBandFilter(band) {
       currentBandFilter = band;
       
-      // 更新按鈕樣式
       document.querySelectorAll('.band-filter-btn').forEach(btn => {
         btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
         btn.classList.add('bg-slate-100', 'text-slate-600');
@@ -440,7 +478,6 @@
 
       document.getElementById('questionCountBadge').innerText = `${filteredKeys.length} 道題目`;
 
-      // 渲染學生端下拉選單
       filteredKeys.forEach((key) => {
         const q = questions[key];
         const opt = document.createElement('option');
@@ -449,7 +486,6 @@
         select.appendChild(opt);
       });
 
-      // 渲染教師端全部列表
       keys.forEach((key) => {
         const q = questions[key];
         const card = document.createElement('div');
@@ -479,6 +515,7 @@
     }
 
     function selectQuestion(key) {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
       currentQKey = key;
       const box = document.getElementById('currentQuestionBox');
       const answerArea = document.getElementById('answerArea');
@@ -525,6 +562,7 @@
       } else {
         sampleBox.classList.add('hidden');
         btnText.innerText = '觀看 AI 建議答案';
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
       }
     }
 
@@ -730,7 +768,7 @@ This experience taught me the value of perseverance and effective communication 
           if (hasExample) strengths.push(`• 非常優秀！能夠運用「例如/記得有一次」等具體個人經歷來支持觀點，大幅增加說服力。`);
           else weaknesses.push(`• 缺乏具體的個人生活事例或學習經驗支撐，使回答顯得較為空洞泛談。`);
 
-          if (hasLogic) strengths.push(`• 邏輯層次分明，能夠善用「因為、所以、此外」等連接詞結構化表達。`);
+          if (hasLogic) strengths.push(`• 邏輯層次分明，數能善用「因為、所以、此外」等連接詞結構化表達。`);
           else weaknesses.push(`• 句式結構較為單一，建議多使用關聯詞（如：第一……此外……總括來說……）強化條理性。`);
         }
 
