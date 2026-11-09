@@ -104,7 +104,7 @@
         </button>
       </div>
 
-      <!-- AI Feedback Result (含詳細作答例子) -->
+      <!-- AI Feedback Result (動態輸出專屬詳細作答例子) -->
       <div id="aiResultBox" class="hidden bg-white rounded-xl shadow-md border border-indigo-100 p-5 space-y-3">
         <div class="flex justify-between items-center border-b border-slate-100 pb-2">
           <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
@@ -428,7 +428,7 @@
       }
     }
 
-    // 生成高品質具體示範答案核心
+    // 依據題目動態生成詳盡高分作答例子與邏輯拆解
     function generateDetailedSample(title, band, isEnglish) {
       if (isEnglish) {
         return `📌 【Recommended Structure (PREP Model)】:
@@ -437,10 +437,10 @@
 • Example: Share a realistic primary school experience.
 • Point: Summarize and express enthusiasm for secondary school.
 
-📝 【Band 1 High-Score Sample Answer】:
+📝 【${band} High-Score Sample Answer】:
 "Thank you for asking this question. In response to '${title}', I strongly believe that taking initiative and keeping a positive attitude are essential.
 
-For instance, during our primary school science project last term, our team encountered a huge difficulty when our experiment failed right before the deadline. As the team coordinator, I immediately encouraged my teammates, listened to everyone's ideas, and redistributed our tasks to rerun the experiment. Eventually, we successfully presented our project and earned positive remarks from our teachers.
+For instance, during our primary school project last term, our team encountered a huge difficulty when our experiment failed right before the deadline. As the team coordinator, I immediately encouraged my teammates, listened to everyone's ideas, and redistributed our tasks to rerun the experiment. Eventually, we successfully presented our project and earned positive remarks from our teachers.
 
 This experience taught me the value of perseverance and effective communication under pressure. I look forward to bringing this proactive spirit to your school and taking on new academic challenges."`;
       } else {
@@ -450,7 +450,7 @@ This experience taught me the value of perseverance and effective communication 
 • A (行動)：具體分享你採取了什麼行動（溝通、領導、主動學習）。
 • R (結果)：最後獲得的成果與對個人成長的啟發。
 
-📝 【高分作答範例】：
+📝 【${band} 高分作答範例】：
 「各位面試官老師好！針對『${title}』這個題目，我的核心看法是：保持積極主動的學習態度與同理心溝通，是克服任何困難的關鍵。
 
 以我自己小學六年的經驗為例，在上一學期的專題研習活動中，我們小組遇到了時間緊迫且成員意見分歧的挑戰。當時我主動擔任協調者，建議大家先列表分析各自方案的優缺點，並採用民主投票達成共識。最終，我們組不僅按時繳交報告，更獲得了全班最高分的優異成績。
@@ -548,7 +548,7 @@ This experience taught me the value of perseverance and effective communication 
       document.getElementById('studentAnswer').value = '';
     }
 
-    // 🌟 深度多維度語意分析引擎 (評語時直接附上該題目的詳細作答例子)
+    // 🌟 深度多維度語意分析引擎 (動態生成專屬題目的高分詳細示範)
     function submitAnswerForAI() {
       const ans = document.getElementById('studentAnswer').value.trim();
       if (!ans) {
@@ -572,6 +572,7 @@ This experience taught me the value of perseverance and effective communication 
         const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
         const isRefusal = ans.includes("不知道") || ans.includes("冇") || ans.includes("無") || ans.includes("don't know") || ans.includes("no idea");
 
+        // ✨ 即時根據題目生成專屬詳盡範本
         const sampleText = generateDetailedSample(q.title, q.band, isEnglish);
 
         if (isTooShort || isGibberish || isRefusal) {
@@ -608,7 +609,6 @@ This experience taught me the value of perseverance and effective communication 
 
         let strengths = [];
         let weaknesses = [];
-        let suggestions = [];
 
         if (isEnglish) {
           if (hasRelevantWords) strengths.push(`• Directly addresses the core topic of "${q.title}".`);
