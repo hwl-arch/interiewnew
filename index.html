@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>升中面試 AI 練習系統</title>
+  <title>聖馬太升中面試 AI 練習系統</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -22,7 +22,7 @@
     <div class="max-w-4xl mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2">
         <i data-lucide="graduation-cap" class="w-7 h-7"></i>
-        <h1 class="text-xl font-bold tracking-wide">升中面試 AI 練習系統</h1>
+        <h1 class="text-xl font-bold tracking-wide">聖馬太升中面試 AI 練習系統</h1>
       </div>
       <div class="flex items-center gap-2">
         <div id="connectionStatus" class="flex items-center gap-1.5 text-xs bg-indigo-700 px-3 py-1.5 rounded-full">
@@ -39,7 +39,7 @@
 
   <main class="max-w-4xl mx-auto space-y-4 pb-12">
     <!-- Student View -->
-    <div id="studentView" class="space-y-4">
+    <div id="studentView" class="space-y-4 hidden">
       <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
         <div>
           <h2 class="font-bold text-indigo-900 text-lg">🎓 學生練習區</h2>
@@ -104,7 +104,7 @@
         </button>
       </div>
 
-      <!-- AI Feedback Result (動態輸出專屬詳細作答例子) -->
+      <!-- AI Feedback Result -->
       <div id="aiResultBox" class="hidden bg-white rounded-xl shadow-md border border-indigo-100 p-5 space-y-3">
         <div class="flex justify-between items-center border-b border-slate-100 pb-2">
           <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
@@ -125,10 +125,11 @@
           <h2 class="font-bold text-amber-900 text-base flex items-center gap-2">
             <i data-lucide="shield-check" class="w-5 h-5"></i> 教師管理後台
           </h2>
-          <p class="text-xs text-amber-700">您可以管理題目、修改密碼或批量匯入題目。</p>
+          <p class="text-xs text-amber-700">您可以管理題目、修改教師/學生密碼或批量匯入題目。</p>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="openPasswordModal()" class="bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition">修改密碼</button>
+          <button onclick="openStudentPasswordModal()" class="bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition">修改學生密碼</button>
+          <button onclick="openPasswordModal()" class="bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition">修改教師密碼</button>
           <button onclick="exitTeacherMode()" class="bg-amber-600 text-white hover:bg-amber-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition">返回學生模式</button>
         </div>
       </div>
@@ -149,6 +150,23 @@
       <div id="teacherQuestionList" class="space-y-2.5"></div>
     </div>
   </main>
+
+  <!-- Student Login Modal (學生登入彈窗) -->
+  <div id="studentLoginModal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl text-center">
+      <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto">
+        <i data-lucide="lock" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-800 text-lg">學生登入驗證</h3>
+        <p class="text-xs text-slate-500 mt-1">請輸入老師提供的學生練習密碼以進入系統。</p>
+      </div>
+      <input type="password" id="studentPwdInput" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none text-center tracking-widest" placeholder="請輸入學生密碼" onkeypress="if(event.key==='Enter') verifyStudentPassword()">
+      <button onclick="verifyStudentPassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow-md transition">
+        進入練習系統
+      </button>
+    </div>
+  </div>
 
   <!-- Add/Edit Question Modal -->
   <div id="qModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
@@ -236,11 +254,11 @@
     </div>
   </div>
 
-  <!-- Password Modal -->
+  <!-- Teacher Password Modal -->
   <div id="pwdModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3 shadow-2xl">
       <h3 id="pwdTitle" class="font-bold text-slate-800 text-base">教師身分驗證</h3>
-      <input type="password" id="pwdInput" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-indigo-500" placeholder="請輸入教師密碼">
+      <input type="password" id="pwdInput" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-indigo-500" placeholder="請輸入教師密碼" onkeypress="if(event.key==='Enter') verifyPassword()">
       <div class="flex justify-end gap-2">
         <button onclick="closeModal('pwdModal')" class="px-3 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-semibold">取消</button>
         <button id="pwdSubmitBtn" onclick="verifyPassword()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold shadow">確認</button>
@@ -264,6 +282,7 @@
     let currentQKey = null;
     let isTeacher = false;
     let teacherPassword = '1234';
+    let studentPassword = 'student123'; // 預設學生登入密碼
     let recognition = null;
     let isRecording = false;
 
@@ -271,7 +290,30 @@
       lucide.createIcons();
       initFirebase();
       setupSpeechRecognition();
+      checkStudentAuth();
     });
+
+    function checkStudentAuth() {
+      const isStudentLoggedIn = sessionStorage.getItem('student_authed');
+      if (isStudentLoggedIn === 'true') {
+        document.getElementById('studentLoginModal').classList.add('hidden');
+        document.getElementById('studentView').classList.remove('hidden');
+      } else {
+        document.getElementById('studentLoginModal').classList.remove('hidden');
+        document.getElementById('studentView').classList.add('hidden');
+      }
+    }
+
+    function verifyStudentPassword() {
+      const inputPwd = document.getElementById('studentPwdInput').value.trim();
+      if (inputPwd === studentPassword) {
+        sessionStorage.setItem('student_authed', 'true');
+        document.getElementById('studentLoginModal').classList.add('hidden');
+        document.getElementById('studentView').classList.remove('hidden');
+      } else {
+        alert('學生登入密碼不正確！請向老師查詢。');
+      }
+    }
 
     function initFirebase() {
       try {
@@ -300,6 +342,10 @@
           if (snapshot.exists()) teacherPassword = snapshot.val();
         });
 
+        db.ref('student_password').on('value', (snapshot) => {
+          if (snapshot.exists()) studentPassword = snapshot.val();
+        });
+
       } catch (e) {
         console.warn('Firebase Config Error:', e);
         fallbackLocalMode();
@@ -317,6 +363,10 @@
       } else {
         seedDefaultQuestions();
       }
+
+      const localStudentPwd = localStorage.getItem('student_password');
+      if (localStudentPwd) studentPassword = localStudentPwd;
+
       renderQuestions();
     }
 
@@ -428,7 +478,6 @@
       }
     }
 
-    // 依據題目動態生成詳盡高分作答例子與邏輯拆解
     function generateDetailedSample(title, band, isEnglish) {
       if (isEnglish) {
         return `📌 【Recommended Structure (PREP Model)】:
@@ -455,7 +504,7 @@ This experience taught me the value of perseverance and effective communication 
 
 以我自己小學六年的經驗為例，在上一學期的專題研習活動中，我們小組遇到了時間緊迫且成員意見分歧的挑戰。當時我主動擔任協調者，建議大家先列表分析各自方案的優缺點，並採用民主投票達成共識。最終，我們組不僅按時繳交報告，更獲得了全班最高分的優異成績。
 
-這次經歷讓我深切體會到，面對挑戰時，冷靜溝通比執著於個人意見更重要。這也是我一直持有的優點，希望能將這份熱情帶入貴校的中學生活。」`;
+這次經歷讓我深切體會到，面對挑戰時，冷靜溝通比執著於個人意見更重要。這也是我一直持有的優勢，希望能將這份熱情帶入貴校的中學生活。」`;
       }
     }
 
@@ -548,7 +597,6 @@ This experience taught me the value of perseverance and effective communication 
       document.getElementById('studentAnswer').value = '';
     }
 
-    // 🌟 深度多維度語意分析引擎 (動態生成專屬題目的高分詳細示範)
     function submitAnswerForAI() {
       const ans = document.getElementById('studentAnswer').value.trim();
       if (!ans) {
@@ -572,7 +620,6 @@ This experience taught me the value of perseverance and effective communication 
         const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
         const isRefusal = ans.includes("不知道") || ans.includes("冇") || ans.includes("無") || ans.includes("don't know") || ans.includes("no idea");
 
-        // ✨ 即時根據題目生成專屬詳盡範本
         const sampleText = generateDetailedSample(q.title, q.band, isEnglish);
 
         if (isTooShort || isGibberish || isRefusal) {
@@ -663,18 +710,19 @@ This experience taught me the value of perseverance and effective communication 
       if (val === teacherPassword) {
         isTeacher = true;
         closeModal('pwdModal');
+        document.getElementById('studentLoginModal').classList.add('hidden');
         document.getElementById('studentView').classList.add('hidden');
         document.getElementById('teacherView').classList.remove('hidden');
         document.getElementById('modeText').innerText = '退出教師模式';
       } else {
-        alert('密碼不正確！');
+        alert('教師密碼不正確！');
       }
     }
 
     function exitTeacherMode() {
       isTeacher = false;
       document.getElementById('teacherView').classList.add('hidden');
-      document.getElementById('studentView').classList.remove('hidden');
+      checkStudentAuth();
       document.getElementById('modeText').innerText = '教師登入';
     }
 
@@ -683,7 +731,17 @@ This experience taught me the value of perseverance and effective communication 
       if (newPwd && newPwd.trim().length > 0) {
         teacherPassword = newPwd.trim();
         if (db) db.ref('teacher_password').set(teacherPassword);
-        alert('密碼修改成功！');
+        alert('教師密碼修改成功！');
+      }
+    }
+
+    function openStudentPasswordModal() {
+      const newPwd = prompt('請輸入新的學生登入密碼：', studentPassword);
+      if (newPwd && newPwd.trim().length > 0) {
+        studentPassword = newPwd.trim();
+        if (db) db.ref('student_password').set(studentPassword);
+        localStorage.setItem('student_password', studentPassword);
+        alert('學生登入密碼修改成功！');
       }
     }
 
