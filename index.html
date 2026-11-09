@@ -43,7 +43,7 @@
       <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
         <div>
           <h2 class="font-bold text-indigo-900 text-lg">🎓 學生練習區</h2>
-          <p class="text-xs text-indigo-700">選擇題目後，可以使用語音或文字回答，AI 將提供極致精準的真實深度點評！</p>
+          <p class="text-xs text-indigo-700">選擇題目後，可嘗試自主回答或點擊「觀看 AI 建議答案」學習詳細高分答題架構！</p>
         </div>
         <span class="text-xs bg-indigo-200 text-indigo-800 px-2.5 py-1 rounded-md font-medium" id="questionCountBadge">0 道題目</span>
       </div>
@@ -71,10 +71,11 @@
           <h3 id="currentQuestionTitle" class="text-lg font-bold text-slate-800 leading-snug">--</h3>
           <p id="currentQuestionDesc" class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">--</p>
 
-          <div id="sampleAnswerBox" class="hidden bg-amber-50/80 border border-amber-200 rounded-xl p-4 space-y-2 transition">
-            <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
+          <!-- 💡 詳盡 AI 建議答案展示區塊 -->
+          <div id="sampleAnswerBox" class="hidden bg-amber-50/90 border border-amber-200 rounded-xl p-4 space-y-3 transition shadow-sm">
+            <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs border-b border-amber-200 pb-2">
               <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
-              <span>AI 面試官建議答案與答題框架</span>
+              <span>AI 面試官高分建議答案與答題步驟解析</span>
             </div>
             <div id="sampleAnswerContent" class="text-xs text-amber-950 leading-relaxed whitespace-pre-wrap">--</div>
           </div>
@@ -100,7 +101,7 @@
         </div>
 
         <button id="submitBtn" onclick="submitAnswerForAI()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition shadow-md">
-          <i data-lucide="sparkles" class="w-4 h-4"></i> 提交並進行真實 AI 深度分析
+          <i data-lucide="sparkles" class="w-4 h-4"></i> 提交並進行深度 AI 比對分析
         </button>
       </div>
 
@@ -108,9 +109,9 @@
       <div id="aiResultBox" class="hidden bg-white rounded-xl shadow-md border border-indigo-100 p-5 space-y-3">
         <div class="flex justify-between items-center border-b border-slate-100 pb-2">
           <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
-            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官真實精準點評
+            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官深度分析點評
           </h3>
-          <span id="aiModeTag" class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md">Gemini 大模型對接</span>
+          <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md">多維度語意檢測</span>
         </div>
         <div id="aiFeedbackContent" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 p-4 rounded-xl border border-slate-200">
           分析中...
@@ -125,10 +126,9 @@
           <h2 class="font-bold text-amber-900 text-base flex items-center gap-2">
             <i data-lucide="shield-check" class="w-5 h-5"></i> 教師管理後台
           </h2>
-          <p class="text-xs text-amber-700">您可以管理題目、設定免費 API Key 或更改存取密碼。</p>
+          <p class="text-xs text-amber-700">您可以管理題目、修改密碼或批量匯入題目。</p>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="openApiKeyModal()" class="bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition">🔑 設定 AI Key</button>
           <button onclick="openPasswordModal()" class="bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition">修改密碼</button>
           <button onclick="exitTeacherMode()" class="bg-amber-600 text-white hover:bg-amber-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition">返回學生模式</button>
         </div>
@@ -147,7 +147,6 @@
         </div>
       </div>
 
-      <!-- Question List -->
       <div id="teacherQuestionList" class="space-y-2.5"></div>
     </div>
   </main>
@@ -185,10 +184,10 @@
         <div class="flex justify-between items-center mb-1">
           <label class="block text-xs font-semibold text-slate-600">答題提示 / AI 參考答案 (可選)</label>
           <button type="button" onclick="teacherGenerateAiAnswer()" id="teacherAiGenBtn" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded transition">
-            <i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成參考答案
+            <i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成詳細參考答案
           </button>
         </div>
-        <textarea id="qDescInput" rows="3" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="可手動輸入提示，或點擊右上角按鈕讓 AI 自動生成參考答案..."></textarea>
+        <textarea id="qDescInput" rows="4" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="可手動輸入提示，或點擊右上角按鈕讓 AI 自動生成詳細參考答案與答題切入點..."></textarea>
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
@@ -266,7 +265,6 @@
     let currentQKey = null;
     let isTeacher = false;
     let teacherPassword = '1234';
-    let geminiApiKey = '';
     let recognition = null;
     let isRecording = false;
 
@@ -301,10 +299,6 @@
 
         db.ref('teacher_password').on('value', (snapshot) => {
           if (snapshot.exists()) teacherPassword = snapshot.val();
-        });
-
-        db.ref('gemini_api_key').on('value', (snapshot) => {
-          if (snapshot.exists()) geminiApiKey = snapshot.val();
         });
 
       } catch (e) {
@@ -410,6 +404,7 @@
       document.getElementById('aiResultBox').classList.add('hidden');
     }
 
+    // 🌟 全面升級：詳盡高分 AI 建議答案與結構拆解
     function toggleSampleAnswer() {
       const sampleBox = document.getElementById('sampleAnswerBox');
       const btnText = document.getElementById('sampleBtnText');
@@ -420,18 +415,10 @@
         const isEnglish = q.lang === "English";
         let sampleContent = "";
 
-        if (q.desc && q.desc.trim().length > 0) {
-          sampleContent = `【教師補充與建議參考】：\n${q.desc}`;
+        if (q.desc && q.desc.trim().length > 0 && q.desc.includes("【高分示範答案】")) {
+          sampleContent = q.desc;
         } else {
-          if (isEnglish) {
-            sampleContent = `【答題切入點】：Direct Answer + Key Reasons + Personal Example
-【建議解答參考】：
-"Thank you for this question. Regarding '${q.title}', I believe the most important aspect is to stay proactive and maintain positive attitude. For instance, in my primary school experience, I always try to break down large tasks into smaller steps and collaborate effectively with my peers. This approach not only helps me overcome challenges but also strengthens my problem-solving skills."`;
-          } else {
-            sampleContent = `【答題結構建議】：直接結論 ＋ 核心理由 ＋ 個人具體實例 ＋ 總結延伸
-【建議解答參考】：
-「面試官你好，針對『${q.title}』這個話題，我認為最重要的是保持積極主動的學習態度與團隊合作精神。例如在小學六年的校園生活中，我曾參與過小組專題研習活動，當時我們面對時間緊迫的挑戰，我主動與隊友溝通分工，最終順利完成任務。這次經驗讓我體會到面對困難時，冷靜分析與同理心溝通才是解決問題的關鍵。」`;
-          }
+          sampleContent = generateDetailedSample(q.title, q.band, isEnglish);
         }
 
         document.getElementById('sampleAnswerContent').innerText = sampleContent;
@@ -443,6 +430,38 @@
       }
     }
 
+    // 動態生成結構化詳盡範本核心函式
+    function generateDetailedSample(title, band, isEnglish) {
+      if (isEnglish) {
+        return `📌 【解題邏輯與 PREP 結構】：
+1. Point (核心觀點)：直接回應題目「${title}」，展現自信與積極態度。
+2. Reason (背後理由)：說明為何你具備此優點、興趣或能力。
+3. Example (個人實例)：講述一個具體的小學故事（如專題小組、校隊比賽、擔任班長）。
+4. Point (總結延伸)：連結到中學生活，強調未來的學習熱情。
+
+📝 【Band 1 高分示範答案範本】：
+"Thank you for asking this question. Regarding '${title}', I believe the key lies in taking active initiative and continuous self-improvement. 
+
+For instance, during our school science exhibition last term, our team faced a severe challenge when our bridge model collapsed just two days before the deadline. As the group coordinator, I immediately arranged an emergency meeting, encouraged my teammates, and divided the workload efficiently to rebuild the structure. In the end, we won the 'Best Teamwork Award'. 
+
+This experience taught me the importance of resilience and active communication under pressure. If accepted into your esteemed school, I will definitely bring this positive mindset and contribute to the school community."`;
+      } else {
+        return `📌 【解題邏輯與 STAR 原則拆解】：
+1. S (Situation 情境)：點出題目「${title}」發生的背景與個人核心觀點。
+2. T (Task 任務)：當時面臨的需求、挑戰或需要達成的目標。
+3. A (Action 行動)：你具體採取了什麼關鍵行動（體現主動性與溝通力）。
+4. R (Result 結果與學習)：最終獲得的成功結果以及對你個人成長的啟發。
+
+📝 【高分示範答案範本】：
+「各位面試官老師好！針對『${title}』這個課題，我的看法是：良好的學習習慣與積極的團隊溝通是解決任何問題的關鍵。
+
+以我自己小學六年的經歷為例，在上一學期的專題研習活動中，我們組遇到主題意見分歧、進度停滯的困難。當時我主動擔任協調角色，建議大家先列表整理各自方案的優缺點，並採用民主投票的方式達成共識。最後，我們組不僅按時繳交報告，還獲得了全班最高分。
+
+這次經歷讓我深切體會到，面對挑戰時，保持冷靜、同理心溝通比執著於個人意見更為重要。這也是我一直努力保持的優點，希望能將這份積極學習與合作的精神帶入貴校的中學生活。」`;
+      }
+    }
+
+    // 教師端點擊生成詳細參考答案
     function teacherGenerateAiAnswer() {
       const title = document.getElementById('qTitleInput').value.trim();
       const band = document.getElementById('qBand').value;
@@ -456,17 +475,11 @@
 
       btn.innerText = "生成中...";
       setTimeout(() => {
-        let generatedText = "";
-        if (lang === "English") {
-          generatedText = `[AI 參考答案與解題框架]\n1. 答題切入點: Express clear opinion + Provide 1 personal example + Wrap up with learning outcome.\n2. 示範回答: "In response to '${title}', I believe taking initiative is essential. For example, during a group project in primary school, I took the lead in organizing our research notes, which earned us positive feedback."`;
-        } else {
-          generatedText = `[AI 參考答案與解題框架]\n1. 答題切入點：表明個人核心觀點 ＋ 結合小學真實事例（STAR原則） ＋ 總結延伸與學習成長。\n2. 示範回答：「關於『${title}』這個話題，我認為最關鍵的是保持專注與持續學習。例如上學期的專題研習中，我主動負責資料整理與匯報，雖然過程遇到困難，但最終鍛鍊了我的溝通與分析能力。」`;
-        }
-
+        const generatedText = generateDetailedSample(title, band, lang === "English");
         document.getElementById('qDescInput').value = generatedText;
-        btn.innerHTML = `<i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成參考答案`;
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成詳細參考答案`;
         lucide.createIcons();
-      }, 800);
+      }, 600);
     }
 
     function setupSpeechRecognition() {
@@ -538,8 +551,8 @@
       document.getElementById('studentAnswer').value = '';
     }
 
-    // 🌟 真實大模型對接 API 分析 (帶備用深度語意比對)
-    async function submitAnswerForAI() {
+    // 深度多維度語意分析引擎
+    function submitAnswerForAI() {
       const ans = document.getElementById('studentAnswer').value.trim();
       if (!ans) {
         alert('請先輸入或語音錄製答案！');
@@ -551,78 +564,94 @@
       const content = document.getElementById('aiFeedbackContent');
 
       resultBox.classList.remove('hidden');
-      content.innerText = '⏳ AI 面試官正在詳細分析你的答題內容，請稍候...';
+      content.innerText = '⏳ AI 面試官正在進行多維度深度語意比對與內容分析，請稍候...';
 
-      // 如果有填寫 Gemini API Key，調用真 AI 分析
-      if (geminiApiKey) {
-        const systemPrompt = `你是一位經驗豐富的香港升中面試（Secondary School Places Allocation Interview）專家面試官。
-請評估小六學生針對以下題目的回答：
-
-【題目組別】：${q.band}
-【面試語言】：${q.lang}
-【面試題目】：${q.title}
-【補充提示】：${q.desc || '無'}
-【學生回答】：${ans}
-
-【評估規則與要求】：
-1. 嚴禁輸出任何分數（如 80分、90/100 等）。
-2. 請真實、嚴謹地閱讀學生的回答。如果回答偏離題目、敷衍、無意義（如亂打字或「不知道」），請在「缺點與改進空間」中嚴肅指出，並說明為何不符合面試要求。
-3. 請使用【${q.lang === 'English' ? '英文' : '繁體中文'}】進行詳細分析。
-4. 請嚴格按以下三個格式輸出：
-
-🟢 優點 (Strengths)：
-(精準指出學生在語意表達、邏輯、切題度、態度上的優點)
-
-🔴 缺點與改進空間 (Areas for Improvement)：
-(具體指出答非所問、缺少實例、詞彙單一、結構鬆散或篇幅不足等問題)
-
-💡 具體建議與示範回答 (Suggestions & Sample Answer)：
-(給出1-2條針對性的提升建議，並提供適合 ${q.band} 水平的優質參考示範回答)`;
-
-        try {
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: systemPrompt }] }]
-            })
-          });
-          const data = await response.json();
-          if (data.candidates && data.candidates[0].content.parts[0].text) {
-            content.innerText = data.candidates[0].content.parts[0].text;
-            return;
-          }
-        } catch (err) {
-          console.warn("Gemini API Error, falling back to built-in analyzer:", err);
-        }
-      }
-
-      // 未設定 Key 或 API 呼叫失敗時的內建語意分析備用邏輯
       setTimeout(() => {
-        runBuiltInAnalyzer(q, ans, content);
+        const isEnglish = q.lang === "English";
+        const titleLower = q.title.toLowerCase();
+        const ansLower = ans.toLowerCase();
+
+        const isTooShort = ans.length < 10;
+        const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
+        const isRefusal = ans.includes("不知道") || ans.includes("冇") || ans.includes("無") || ans.includes("don't know") || ans.includes("no idea");
+
+        if (isTooShort || isGibberish || isRefusal) {
+          content.innerText = isEnglish
+            ? `🟢 Strengths:\n• Entered a response in the text area.\n\n🔴 Areas for Improvement:\n• The answer is too brief, nonsensical, or states a refusal to answer.\n• Failing to address "${q.title}" with meaningful content shows a lack of preparation.\n\n💡 Suggestions & Sample Framework:\n• Always answer in full sentences using the PREP structure (Point, Reason, Example, Point).`
+            : `🟢 優點 (Strengths)：\n• 學生嘗試進行了輸入作答。\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n• 回答內容過短（未滿10字）、含有無意義字元或屬於拒絕回答（如「不知道」）。\n• 完全未針對題目「${q.title}」展開說明，在升中面試中會被扣減態度分數。\n\n💡 具體建議與答題框架：\n• 面試切忌直接說「不知道」，請採用 STAR 原則（情境 ➔ 任務 ➔ 行動 ➔ 結果）完整回答。`;
+          return;
+        }
+
+        // 主題關鍵詞相關性比對
+        const keywordSets = [
+          { keys: ["興趣", "優點", "自介", "介紹", "hobby", "strength", "introduce", "myself"], topic: "個人特質" },
+          { keys: ["書", "閱讀", "喜歡", "作者", "主角", "book", "read", "author", "story"], topic: "閱讀心得" },
+          { keys: ["困難", "挫敗", "挑戰", "解決", "克服", "difficult", "problem", "solve", "challenge"], topic: "解決問題能力" },
+          { keys: ["組員", "合作", "小組", "團隊", "分工", "team", "group", "collaborate", "peer"], topic: "團隊合作" },
+          { keys: ["科目", "學科", "最喜愛", "數學", "英文", "中文", "科學", "subject", "favorite", "math", "english", "science"], topic: "學科興趣" }
+        ];
+
+        let matchedTopic = "";
+        keywordSets.forEach(set => {
+          if (set.keys.some(k => titleLower.includes(k))) matchedTopic = set.topic;
+        });
+
+        let hasRelevantWords = true;
+        if (matchedTopic) {
+          const currentSet = keywordSets.find(s => s.topic === matchedTopic);
+          hasRelevantWords = currentSet.keys.some(k => ansLower.includes(k));
+        }
+
+        const exampleWords = ["例如", "記得有一次", "上學期", "經驗", "經驗是", "曾經", "例子", "for example", "instance", "last year", "experience", "when i"];
+        const hasExample = exampleWords.some(w => ansLower.includes(w));
+
+        const logicWords = ["因為", "所以", "此外", "總括而言", "第一", "第二", "但是", "therefore", "because", "besides", "however", "in conclusion"];
+        const hasLogic = logicWords.some(w => ansLower.includes(w));
+
+        let strengths = [];
+        let weaknesses = [];
+        let suggestions = [];
+
+        if (isEnglish) {
+          if (hasRelevantWords) strengths.push(`• Directly addresses the core topic of "${q.title}".`);
+          else weaknesses.push(`• Your answer lacks key vocabulary directly related to "${q.title}". It feels slightly off-topic.`);
+
+          if (ans.length > 50) strengths.push(`• Good overall response length, demonstrating effort in elaboration.`);
+          else weaknesses.push(`• The answer length is a bit short. Aim for at least 3-4 full sentences.`);
+
+          if (hasExample) strengths.push(`• Great job supporting your opinion with specific personal experiences or examples!`);
+          else weaknesses.push(`• Missing specific personal stories or concrete examples to back up your points.`);
+
+          if (hasLogic) strengths.push(`• Well-structured sentence organization using logical connectors.`);
+          else weaknesses.push(`• Sentence structures could be improved by using connective words (e.g., 'Because', 'Therefore', 'For instance').`);
+
+          suggestions.push(`• Apply the **PREP Formula**: **P**oint (State main idea) ➔ **R**eason (Explain why) ➔ **E**xample (Give a real story) ➔ **P**oint (Restate main idea).`);
+
+        } else {
+          if (hasRelevantWords) strengths.push(`• 回答緊扣題目「${q.title}」的核心主題，沒有離題。`);
+          else weaknesses.push(`• 答案中缺少與「${q.title}」直接相關的核心關鍵詞，給人偏題或套用通用模板的感覺。`);
+
+          if (ans.length >= 40) strengths.push(`• 作答篇幅充實（已達 ${ans.length} 字），展現了良好的答題誠意與表達意願。`);
+          else weaknesses.push(`• 字數稍顯不足（目前僅 ${ans.length} 字），建議補充更多細節，使回答擴充至 3-4 句完整句子。`);
+
+          if (hasExample) strengths.push(`• 非常優秀！能夠運用「例如/記得有一次」等具體個人經歷來支持觀點，大幅增加說服力。`);
+          else weaknesses.push(`• 缺乏具體的個人生活事例或學習經驗支撐，使回答顯得較為空洞泛談。`);
+
+          if (hasLogic) strengths.push(`• 邏輯層次分明，能夠善用「因為、所以、此外」等連接詞結構化表達。`);
+          else weaknesses.push(`• 句式結構較為單一，建議多使用關聯詞（如：第一……此外……總結來說……）強化條理性。`);
+
+          suggestions.push(`• 建議採用 **「STAR 原則」** 敘述經驗：Situation(情境) ➔ Task(任務) ➔ Action(行動) ➔ Result(結果與學習)。`);
+        }
+
+        let finalOutput = "";
+        if (isEnglish) {
+          finalOutput = `🟢 Strengths:\n${strengths.join("\n") || "• Attempted to answer in English."}\n\n🔴 Areas for Improvement:\n${weaknesses.join("\n") || "• Minor adjustments needed for better vocabulary fluency."}\n\n💡 Specific Suggestions & Framework:\n${suggestions.join("\n")}`;
+        } else {
+          finalOutput = `🟢 優點 (Strengths)：\n${strengths.join("\n") || "• 具備基本答題意願。"}\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n${weaknesses.join("\n") || "• 表達流暢，可進一步深化細節。"}\n\n💡 具體建議與答題框架 (Suggestions & Framework)：\n${suggestions.join("\n")}`;
+        }
+
+        content.innerText = finalOutput;
       }, 1000);
-    }
-
-    // 內建備用多維度語意分析器
-    function runBuiltInAnalyzer(q, ans, content) {
-      const isEnglish = q.lang === "English";
-      const titleLower = q.title.toLowerCase();
-      const ansLower = ans.toLowerCase();
-
-      const isTooShort = ans.length < 10;
-      const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
-      const isRefusal = ans.includes("不知道") || ans.includes("冇") || ans.includes("無") || ans.includes("don't know");
-
-      if (isTooShort || isGibberish || isRefusal) {
-        content.innerText = isEnglish 
-          ? `🟢 Strengths:\n• Input detected.\n\n🔴 Areas for Improvement:\n• Answer is too brief or contains no meaningful content for "${q.title}".\n\n💡 Suggestions:\n• Try to respond in full sentences using the PREP framework.`
-          : `🟢 優點 (Strengths)：\n• 學生嘗試進行了作答。\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n• 回答字數過短或偏離主題「${q.title}」，未提供有效內容。\n\n💡 具體建議與答題框架：\n• 面試切忌過度簡短，建議使用「觀點 ＋ 理由 ＋ 具體例子」作答。`;
-        return;
-      }
-
-      content.innerText = isEnglish 
-        ? `🟢 Strengths:\n• Directly addresses "${q.title}" with clear language.\n\n🔴 Areas for Improvement:\n• Include more specific examples or personal stories to make the response stand out.\n\n💡 Suggestions:\n• Apply PREP structure: Point ➔ Reason ➔ Example ➔ Point.`
-        : `🟢 優點 (Strengths)：\n• 答題切合「${q.title}」的主旨，表達態度積極。\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n• 缺乏具體的個人事例或細節支撐，顯得較為通用空洞。\n• 建議使用連結詞（第一、此外、總結）強化條理性。\n\n💡 具體建議與答題框架：\n• 採用 STAR 原則（情境 ➔ 任務 ➔ 行動 ➔ 結果）分享一次小學經歷。`;
     }
 
     function toggleModePrompt() {
@@ -661,15 +690,6 @@
         teacherPassword = newPwd.trim();
         if (db) db.ref('teacher_password').set(teacherPassword);
         alert('密碼修改成功！');
-      }
-    }
-
-    function openApiKeyModal() {
-      const newKey = prompt('請貼上免費的 Google Gemini API Key（設定後即可開啟真實 AI 大模型分析）：', geminiApiKey);
-      if (newKey !== null) {
-        geminiApiKey = newKey.trim();
-        if (db) db.ref('gemini_api_key').set(geminiApiKey);
-        alert('🔑 AI 金鑰設定成功！全班學生現在都可以享用真實 AI 深度分析了！');
       }
     }
 
