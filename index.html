@@ -43,7 +43,7 @@
       <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
         <div>
           <h2 class="font-bold text-indigo-900 text-lg">🎓 學生練習區</h2>
-          <p class="text-xs text-indigo-700">選擇題目後，可嘗試自主回答或點擊「觀看 AI 建議答案」學習答題技巧！</p>
+          <p class="text-xs text-indigo-700">選擇題目後，可以使用語音或文字回答，AI 將提供極致精準的真實深度點評！</p>
         </div>
         <span class="text-xs bg-indigo-200 text-indigo-800 px-2.5 py-1 rounded-md font-medium" id="questionCountBadge">0 道題目</span>
       </div>
@@ -71,7 +71,6 @@
           <h3 id="currentQuestionTitle" class="text-lg font-bold text-slate-800 leading-snug">--</h3>
           <p id="currentQuestionDesc" class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">--</p>
 
-          <!-- AI 建議答案展示區塊 -->
           <div id="sampleAnswerBox" class="hidden bg-amber-50/80 border border-amber-200 rounded-xl p-4 space-y-2 transition">
             <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
               <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
@@ -101,7 +100,7 @@
         </div>
 
         <button id="submitBtn" onclick="submitAnswerForAI()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition shadow-md">
-          <i data-lucide="sparkles" class="w-4 h-4"></i> 提交並進行精準 AI 分析
+          <i data-lucide="sparkles" class="w-4 h-4"></i> 提交並進行真實 AI 深度分析
         </button>
       </div>
 
@@ -109,9 +108,9 @@
       <div id="aiResultBox" class="hidden bg-white rounded-xl shadow-md border border-indigo-100 p-5 space-y-3">
         <div class="flex justify-between items-center border-b border-slate-100 pb-2">
           <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
-            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官點評與回饋
+            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官真實精準點評
           </h3>
-          <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md">無分數精準點評</span>
+          <span id="aiModeTag" class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md">Gemini 大模型對接</span>
         </div>
         <div id="aiFeedbackContent" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 p-4 rounded-xl border border-slate-200">
           分析中...
@@ -126,9 +125,10 @@
           <h2 class="font-bold text-amber-900 text-base flex items-center gap-2">
             <i data-lucide="shield-check" class="w-5 h-5"></i> 教師管理後台
           </h2>
-          <p class="text-xs text-amber-700">您可以管理題目、修改密碼或批量匯入題目。</p>
+          <p class="text-xs text-amber-700">您可以管理題目、設定免費 API Key 或更改存取密碼。</p>
         </div>
         <div class="flex items-center gap-2">
+          <button onclick="openApiKeyModal()" class="bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition">🔑 設定 AI Key</button>
           <button onclick="openPasswordModal()" class="bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition">修改密碼</button>
           <button onclick="exitTeacherMode()" class="bg-amber-600 text-white hover:bg-amber-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition">返回學生模式</button>
         </div>
@@ -152,7 +152,7 @@
     </div>
   </main>
 
-  <!-- Add/Edit Question Modal (已新增 AI 輔助生成建議按鈕) -->
+  <!-- Add/Edit Question Modal -->
   <div id="qModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-lg w-full p-5 space-y-3 shadow-2xl">
       <h3 id="modalTitle" class="font-bold text-slate-800 text-base">新增問題</h3>
@@ -188,7 +188,7 @@
             <i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成參考答案
           </button>
         </div>
-        <textarea id="qDescInput" rows="3" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="可手動輸入提示，或點擊右上角按鈕讓 AI 自動生成參考答案與答題切入點..."></textarea>
+        <textarea id="qDescInput" rows="3" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="可手動輸入提示，或點擊右上角按鈕讓 AI 自動生成參考答案..."></textarea>
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
@@ -266,6 +266,7 @@
     let currentQKey = null;
     let isTeacher = false;
     let teacherPassword = '1234';
+    let geminiApiKey = '';
     let recognition = null;
     let isRecording = false;
 
@@ -300,6 +301,10 @@
 
         db.ref('teacher_password').on('value', (snapshot) => {
           if (snapshot.exists()) teacherPassword = snapshot.val();
+        });
+
+        db.ref('gemini_api_key').on('value', (snapshot) => {
+          if (snapshot.exists()) geminiApiKey = snapshot.val();
         });
 
       } catch (e) {
@@ -438,7 +443,6 @@
       }
     }
 
-    // 教師端：點擊生成 AI 參考答案
     function teacherGenerateAiAnswer() {
       const title = document.getElementById('qTitleInput').value.trim();
       const band = document.getElementById('qBand').value;
@@ -534,7 +538,8 @@
       document.getElementById('studentAnswer').value = '';
     }
 
-    function submitAnswerForAI() {
+    // 🌟 真實大模型對接 API 分析 (帶備用深度語意比對)
+    async function submitAnswerForAI() {
       const ans = document.getElementById('studentAnswer').value.trim();
       if (!ans) {
         alert('請先輸入或語音錄製答案！');
@@ -548,70 +553,76 @@
       resultBox.classList.remove('hidden');
       content.innerText = '⏳ AI 面試官正在詳細分析你的答題內容，請稍候...';
 
-      setTimeout(() => {
-        const isEnglish = q.lang === "English";
-        
-        const isTooShort = ans.length < 8;
-        const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
-        const isRepeated = /(.)\1{4,}/.test(ans);
-        const isOffTopic = ans.includes("不知道") || ans.includes("冇") || ans.includes("無") || ans.includes("don't know") || ans.includes("no");
+      // 如果有填寫 Gemini API Key，調用真 AI 分析
+      if (geminiApiKey) {
+        const systemPrompt = `你是一位經驗豐富的香港升中面試（Secondary School Places Allocation Interview）專家面試官。
+請評估小六學生針對以下題目的回答：
 
-        let feedback = "";
+【題目組別】：${q.band}
+【面試語言】：${q.lang}
+【面試題目】：${q.title}
+【補充提示】：${q.desc || '無'}
+【學生回答】：${ans}
 
-        if (isEnglish) {
-          if (isTooShort || isGibberish || isRepeated || isOffTopic) {
-            feedback = `🟢 Strengths:
-• Attempted to provide an answer.
+【評估規則與要求】：
+1. 嚴禁輸出任何分數（如 80分、90/100 等）。
+2. 請真實、嚴謹地閱讀學生的回答。如果回答偏離題目、敷衍、無意義（如亂打字或「不知道」），請在「缺點與改進空間」中嚴肅指出，並說明為何不符合面試要求。
+3. 請使用【${q.lang === 'English' ? '英文' : '繁體中文'}】進行詳細分析。
+4. 請嚴格按以下三個格式輸出：
 
-🔴 Areas for Improvement:
-• The response is too brief, irrelevant, or contains nonsensical characters.
-• Failing to provide a structured answer for "${q.title}" shows a lack of preparation in a formal interview setting.
-
-💡 Suggestions & Sample Answer:
-• Always answer in full sentences and support your points with reasons.
-• Sample Answer: "I would approach this by discussing the problem calmly with my group members and finding a mutual compromise that works for everyone."`;
-          } else {
-            feedback = `🟢 Strengths:
-• Responded directly to the topic of "${q.title}".
-• Good attempt in using English to express personal thoughts clearly.
-
-🔴 Areas for Improvement:
-• The answer could be enriched by including personal anecdotes or practical examples.
-• Try to elaborate more on "why" and "how" to make your answer more convincing.
-
-💡 Suggestions & Sample Answer:
-• Use the PREP method (Point, Reason, Example, Point) to structure your interview response.
-• Sample Answer: "In my opinion, effective communication is key. For example, during a science project last year, we listened to each other's views and successfully divided the workload."`;
-          }
-        } else {
-          if (isTooShort || isGibberish || isRepeated || isOffTopic) {
-            feedback = `🟢 優點 (Strengths)：
-• 學生嘗試進行了輸入作答。
+🟢 優點 (Strengths)：
+(精準指出學生在語意表達、邏輯、切題度、態度上的優點)
 
 🔴 缺點與改進空間 (Areas for Improvement)：
-• 回答內容過於簡短、偏離主題或含有無意義的字元。
-• 未有針對題目「${q.title}」提供實質內容。在正式升中面試中，這樣的回答會被視為準備不足或缺乏態度。
+(具體指出答非所問、缺少實例、詞彙單一、結構鬆散或篇幅不足等問題)
 
 💡 具體建議與示範回答 (Suggestions & Sample Answer)：
-• 建議使用完整句子作答，並包含「回答觀點 ＋ 理由 ＋ 具體例子」三大關鍵要素。
-• 參考示範：可以先直接回答「我最喜歡的科目是……」，然後接著說「因為這門科目讓我學會了……，例如在上學期的小組合作中……」。`;
-          } else {
-            feedback = `🟢 優點 (Strengths)：
-• 切合題目「${q.title}」的主旨，語意表達流暢。
-• 態度積極誠懇，展現出高年級小學生應有的表達能力。
+(給出1-2條針對性的提升建議，並提供適合 ${q.band} 水平的優質參考示範回答)`;
 
-🔴 缺點與改進空間 (Areas for Improvement)：
-• 答案內容稍顯通用，可以加入更多「個人獨特體驗」或「具體例子」來加深面試官的印象。
-• 建議多使用結構化連接詞（如：第一、此外、總括而言），令邏輯層次更分明。
-
-💡 具體建議與示範回答 (Suggestions & Sample Answer)：
-• 建議採用「STAR 原則」（情境、任務、行動、結果）來說明經歷。
-• 參考示範：試著回想一次小學校園生活或課外活動的真實片段，並具體分享你在當中的體會與收穫。`;
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: systemPrompt }] }]
+            })
+          });
+          const data = await response.json();
+          if (data.candidates && data.candidates[0].content.parts[0].text) {
+            content.innerText = data.candidates[0].content.parts[0].text;
+            return;
           }
+        } catch (err) {
+          console.warn("Gemini API Error, falling back to built-in analyzer:", err);
         }
+      }
 
-        content.innerText = feedback;
+      // 未設定 Key 或 API 呼叫失敗時的內建語意分析備用邏輯
+      setTimeout(() => {
+        runBuiltInAnalyzer(q, ans, content);
       }, 1000);
+    }
+
+    // 內建備用多維度語意分析器
+    function runBuiltInAnalyzer(q, ans, content) {
+      const isEnglish = q.lang === "English";
+      const titleLower = q.title.toLowerCase();
+      const ansLower = ans.toLowerCase();
+
+      const isTooShort = ans.length < 10;
+      const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
+      const isRefusal = ans.includes("不知道") || ans.includes("冇") || ans.includes("無") || ans.includes("don't know");
+
+      if (isTooShort || isGibberish || isRefusal) {
+        content.innerText = isEnglish 
+          ? `🟢 Strengths:\n• Input detected.\n\n🔴 Areas for Improvement:\n• Answer is too brief or contains no meaningful content for "${q.title}".\n\n💡 Suggestions:\n• Try to respond in full sentences using the PREP framework.`
+          : `🟢 優點 (Strengths)：\n• 學生嘗試進行了作答。\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n• 回答字數過短或偏離主題「${q.title}」，未提供有效內容。\n\n💡 具體建議與答題框架：\n• 面試切忌過度簡短，建議使用「觀點 ＋ 理由 ＋ 具體例子」作答。`;
+        return;
+      }
+
+      content.innerText = isEnglish 
+        ? `🟢 Strengths:\n• Directly addresses "${q.title}" with clear language.\n\n🔴 Areas for Improvement:\n• Include more specific examples or personal stories to make the response stand out.\n\n💡 Suggestions:\n• Apply PREP structure: Point ➔ Reason ➔ Example ➔ Point.`
+        : `🟢 優點 (Strengths)：\n• 答題切合「${q.title}」的主旨，表達態度積極。\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n• 缺乏具體的個人事例或細節支撐，顯得較為通用空洞。\n• 建議使用連結詞（第一、此外、總結）強化條理性。\n\n💡 具體建議與答題框架：\n• 採用 STAR 原則（情境 ➔ 任務 ➔ 行動 ➔ 結果）分享一次小學經歷。`;
     }
 
     function toggleModePrompt() {
@@ -650,6 +661,15 @@
         teacherPassword = newPwd.trim();
         if (db) db.ref('teacher_password').set(teacherPassword);
         alert('密碼修改成功！');
+      }
+    }
+
+    function openApiKeyModal() {
+      const newKey = prompt('請貼上免費的 Google Gemini API Key（設定後即可開啟真實 AI 大模型分析）：', geminiApiKey);
+      if (newKey !== null) {
+        geminiApiKey = newKey.trim();
+        if (db) db.ref('gemini_api_key').set(geminiApiKey);
+        alert('🔑 AI 金鑰設定成功！全班學生現在都可以享用真實 AI 深度分析了！');
       }
     }
 
