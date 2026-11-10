@@ -94,7 +94,6 @@
                 <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
                 <span>AI 面試官建議答案與答題框架</span>
               </div>
-              <!-- 🔊 建議答案語音朗讀按鈕 -->
               <button onclick="speakText('sampleAnswerContent')" id="speakSampleBtn" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition shadow-sm">
                 <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 朗讀建議答案
               </button>
@@ -134,7 +133,6 @@
             <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官深度分析點評
           </h3>
           <div class="flex items-center gap-2">
-            <!-- 🔊 評語語音朗讀按鈕 -->
             <button onclick="speakText('aiFeedbackContent')" id="speakFeedbackBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition shadow-sm">
               <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 朗讀評語與範例
             </button>
@@ -323,7 +321,7 @@
       checkStudentAuth();
     });
 
-    // 🌟 文字轉語音 (TTS) 朗讀功能
+    // 語音朗讀 (Text-to-Speech)
     function speakText(elementId) {
       if (!('speechSynthesis' in window)) {
         alert('您的瀏覽器不支援語音朗讀功能。');
@@ -344,9 +342,9 @@
       if (q && q.lang === 'English') {
         utterance.lang = 'en-US';
       } else {
-        utterance.lang = 'zh-HK'; // 預設廣東話朗讀
+        utterance.lang = 'zh-HK';
       }
-      utterance.rate = 0.9; // 微調朗讀速度，適合學習
+      utterance.rate = 0.9;
 
       window.speechSynthesis.speak(utterance);
     }
@@ -566,33 +564,51 @@
       }
     }
 
+    // 🌟 動態分類語意生成引擎：依題目關鍵字自動匹配最佳高分範本
     function generateDetailedSample(title, band, isEnglish) {
+      const t = title.toLowerCase();
+
+      // 1. 閱讀與書籍類
+      if (t.includes('書') || t.includes('閱讀') || t.includes('book') || t.includes('read') || t.includes('作者')) {
+        if (isEnglish) {
+          return `📌 【Recommended Structure (PREP Model)】:\n• Point: State your favorite book clearly.\n• Reason: Explain the core theme or takeaway.\n• Example: Connect a story event to your own life.\n• Point: Summarize how reading enriches your learning.\n\n📝 【${band} High-Score Sample Answer】:\n"Thank you for this question. My favorite book is 'The Little Prince'. The central message that 'what is essential is invisible to the eye' resonated deeply with me. During a group project last year, I learned to look past minor conflicts and understand my classmates' perspectives, much like the Little Prince learned to care for his rose. Reading this book taught me empathy and patience, qualities I hope to bring to your school."`;
+        } else {
+          return `📌 【推薦答題結構 (STAR 原則)】：\n• S (情境)：點出你最喜歡的一本書及其核心主題。\n• T (任務)：說明書中哪一段情節或觀點對你啟發最深。\n• A (行動)：具體分享你如何將書中道理應用在日常學習或生活中。\n• R (結果)：總結閱讀對你個人性格與思維的正面提升。\n\n📝 【${band} 高分作答範例】：\n「各位面試官老師好！針對『${title}』這個題目，我最喜愛的一本書是《夏洛的網》。這本書講述了真摯的友誼與承諾的力量。記得在小五參與校際接力賽時，我們隊伍起初因落後而士氣低落。我聯想到書中夏洛默默支持朋友的精神，便主動鼓勵隊友堅持到底，最終我們獲得了季軍。這本書讓我明白到承諾與團隊互信的可貴，也是我一直努力實踐的處事態度。」`;
+        }
+      }
+
+      // 2. 個人特質、興趣與自介類
+      if (t.includes('興趣') || t.includes('優點') || t.includes('介紹') || t.includes('自己') || t.includes('hobby') || t.includes('strength') || t.includes('introduce')) {
+        if (isEnglish) {
+          return `📌 【Recommended Structure (PREP Model)】:\n• Point: Highlight your strongest personality trait or main hobby.\n• Reason: Explain why this trait helps you grow.\n• Example: Give a real primary school activity example.\n• Point: Express your desire to contribute to secondary school.\n\n📝 【${band} High-Score Sample Answer】:\n"Good morning teachers. Regarding '${title}', my greatest strength is my proactive attitude toward learning and active participation in extracurriculars. As a member of our school's robotics team, I spent months practicing coding and debugging under tight schedules. This experience honed my logical thinking and resilience. I am eager to apply these skills to secondary school academics and student society activities."`;
+        } else {
+          return `📌 【推薦答題結構 (STAR 原則)】：\n• S (情境)：開門見山點出自己的核心優點或特別興趣。\n• T (任務)：說明在小學活動中如何展現這項特質。\n• A (行動)：分享具體實踐過程與付出的努力。\n• R (結果)：最後獲得的成長與對中學生活的期望。\n\n📝 【${band} 高分作答範例】：\n「各位面試官老師好！針對『${title}』這個題目，我的核心優點是具備強烈的自主學習熱情與良好的時間管理能力。以小學六年為例，我除了維持優異學業外，還擔任學校風紀隊長與合唱團成員。在籌備畢業音樂會期間，我每天列出優先順序清單，既保證了練習時間，也按時完成功課。這份自律與熱誠，讓我能從容應對各種挑戰，我也非常期待將這份積極態度帶入貴校。」`;
+        }
+      }
+
+      // 3. 學科與學校生活類
+      if (t.includes('科目') || t.includes('課程') || t.includes('規則') || t.includes('獎學金') || t.includes('subject') || t.includes('rule') || t.includes('scholarship')) {
+        if (isEnglish) {
+          return `📌 【Recommended Structure (PREP Model)】:\n• Point: Clearly express your choice or idea.\n• Reason: Provide solid logical arguments.\n• Example: Cite a relevant classroom or school experience.\n• Point: Link to your future academic goals.\n\n📝 【${band} High-Score Sample Answer】:\n"Thank you for asking. Concerning '${title}', I believe that curiosity is the biggest driver in learning. For instance, in our Mathematics classes, I love exploring multiple methods to solve a single complex problem rather than just memorizing formulas. This analytical mindset not only boosted my academic confidence but also taught me to approach challenges from different angles, which will prepare me well for secondary school curriculum."`;
+        } else {
+          return `📌 【推薦答題結構 (STAR 原則)】：\n• S (情境)：直接回應題目主張或選擇。\n• T (任務)：說明該領域或學科帶給你的啟發與挑戰。\n• A (行動)：分享你如何主動探索與深入研習。\n• R (結果)：總結這對你未來中學學習的幫助。\n\n📝 【${band} 高分作答範例】：\n「各位面試官老師好！關於『${title}』這個課題，我的看法是：探究知識的過程比單純獲得答案更重要。以我學習科學科的經驗為例，我們在做植物光合作用實驗時遇到了實驗結果不標準的問題。我沒有直接抄寫課本結論，而是主動查閱資料並重新調配光照時間，最終獲得精準數據。這種求真嚴謹的學習態度，是我認為在中學階段繼續進步的關鍵。」`;
+        }
+      }
+
+      // 4. 挫敗與克服困難類
+      if (t.includes('困難') || t.includes('挫敗') || t.includes('失敗') || t.includes('克服') || t.includes('difficult') || t.includes('problem') || t.includes('challenge')) {
+        if (isEnglish) {
+          return `📌 【Recommended Structure (PREP Model)】:\n• Point: State your main belief in tackling hardship.\n• Reason: Explain the role of teamwork and resilience.\n• Example: Detail a time a school project hit a bottleneck.\n• Point: Show how you overcome obstacles.\n\n📝 【${band} High-Score Sample Answer】:\n"Thank you for this question. Regarding '${title}', I believe staying calm and fostering open communication are key to solving any crisis. During our science exhibition last term, our group's model collapsed right before judging. As team leader, I quickly assigned tasks, focused on rebuilding the base, and encouraged everyone. In the end, we passed the evaluation smoothly. This taught me that challenges are opportunities to grow."`;
+        } else {
+          return `📌 【推薦答題結構 (STAR 原則)】：\n• S (情境)：點出面對『${title}』時的核心態度。\n• T (任務)：說明當時團隊或個人面臨的緊迫困境。\n• A (行動)：具體說明採取的解決步驟（冷靜分析、分工、溝通）。\n• R (結果)：獲得的成果與心態上的突破。\n\n📝 【${band} 高分作答範例】：\n「各位面試官老師好！針對『${title}』這個題目，我的看法是：保持積極主動與同理心溝通，是克服困難的關鍵。以小六專題研習為例，當時組員意見分歧且時間緊迫。我主動擔任協調者，建議大家列表分析方案優缺點並投票決定。最終我們按時完成報告並獲得好評。這次經歷讓我明白冷靜溝通比執著個人意見更重要。」`;
+        }
+      }
+
+      // 5. 通用/其他題目類
       if (isEnglish) {
-        return `📌 【Recommended Structure (PREP Model)】:
-• Point: Directly answer the question "${title}".
-• Reason: Explain why this point is important to you.
-• Example: Share a realistic primary school experience.
-• Point: Summarize and express enthusiasm for secondary school.
-
-📝 【${band} High-Score Sample Answer】:
-"Thank you for asking this question. In response to '${title}', I strongly believe that taking initiative and keeping a positive attitude are essential.
-
-For instance, during our primary school project last term, our team encountered a huge difficulty when our experiment failed right before the deadline. As the team coordinator, I immediately encouraged my teammates, listened to everyone's ideas, and redistributed our tasks to rerun the experiment. Eventually, we successfully presented our project and earned positive remarks from our teachers.
-
-This experience taught me the value of perseverance and effective communication under pressure. I look forward to bringing this proactive spirit to your school and taking on new academic challenges."`;
+        return `📌 【Recommended Structure (PREP Model)】:\n• Point: Express a clear and confident perspective on "${title}".\n• Reason: Elaborate with logical reasoning.\n• Example: Connect with personal school life experience.\n• Point: Summarize with positive ambition.\n\n📝 【${band} High-Score Sample Answer】:\n"Thank you for asking this thought-provoking question about '${title}'. From my perspective, maintaining an open mind and a strong sense of responsibility is crucial. Throughout my primary school years, whether serving as a class monitor or working on group assignments, I always aimed to listen attentively and execute tasks diligently. I am eager to bring this enthusiastic mindset to your esteemed school."`;
       } else {
-        return `📌 【推薦答題結構 (STAR 原則)】：
-• S (情境)：開門見山回答題目「${title}」的核心觀點。
-• T (任務)：說明當時在學校或生活中面對的挑戰或任務。
-• A (行動)：具體分享你採取了什麼行動（溝通、領導、主動學習）。
-• R (結果)：最後獲得的成果與對個人成長的啟發。
-
-📝 【${band} 高分作答範例】：
-「各位面試官老師好！針對『${title}』這個題目，我的核心看法是：保持積極主動的學習態度與同理心溝通，是克服任何困難的關鍵。
-
-以我自己小學六年的經驗為例，在上一學期的專題研習活動中，我們小組遇到了時間緊迫且成員意見分歧的挑戰。當時我主動擔任協調者，建議大家先列表分析各自方案的優缺點，並採用民主投票達成共識。最終，我們組不僅按時繳交報告，更獲得了全班最高分的優異成績。
-
-這次經歷讓我深切體會到，面對挑戰時，冷靜溝通比執著於個人意見更重要。這也是我一直持有的優越品質，希望能將這份熱情帶入貴校的中學生活。」`;
+        return `📌 【推薦答題結構 (STAR 原則)】：\n• S (情境)：開門見山發表對「${title}」的核心觀點。\n• T (任務)：說明該議題背後的思考重點或學習價值。\n• A (行動)：結合個人在小學生活或課外活動中的實際體會。\n• R (結果)：總結回答，展現升讀中學的自信與期待。\n\n📝 【${band} 高分作答範例】：\n「各位面試官老師好！針對『${title}』這個題目，我的核心看法是：保持開放思考與責任感是處理問題的基礎。在小學擔任班長及參與各類校園活動的過程中，我養成了仔細聽取他人意見並果斷執行的習慣。這段歷練培養了我的邏輯表達能力與團隊合作精神，我也期待將這份熱忱帶入貴校的中學生活。」`;
       }
     }
 
@@ -768,7 +784,7 @@ This experience taught me the value of perseverance and effective communication 
           if (hasExample) strengths.push(`• 非常優秀！能夠運用「例如/記得有一次」等具體個人經歷來支持觀點，大幅增加說服力。`);
           else weaknesses.push(`• 缺乏具體的個人生活事例或學習經驗支撐，使回答顯得較為空洞泛談。`);
 
-          if (hasLogic) strengths.push(`• 邏輯層次分明，數能善用「因為、所以、此外」等連接詞結構化表達。`);
+          if (hasLogic) strengths.push(`• 邏輯層次分明，能夠善用「因為、所以、此外」等連接詞結構化表達。`);
           else weaknesses.push(`• 句式結構較為單一，建議多使用關聯詞（如：第一……此外……總括來說……）強化條理性。`);
         }
 
