@@ -43,14 +43,13 @@
       <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
         <div>
           <h2 class="font-bold text-indigo-900 text-lg">🎓 聖馬太學生練習區</h2>
-          <p class="text-xs text-indigo-700">選擇題目後，可以使用語音或文字回答，也可點擊「🔊 語音朗讀」收聽示範！</p>
+          <p class="text-xs text-indigo-700">先嘗試自行作答並查看 AI 評語，再按需生成專屬建議答案與語音朗讀！</p>
         </div>
         <span class="text-xs bg-indigo-200 text-indigo-800 px-2.5 py-1 rounded-md font-medium" id="questionCountBadge">0 道題目</span>
       </div>
 
       <!-- Question Selection & Band Filter -->
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
-        <!-- Band 篩選按鈕區 -->
         <div class="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-3">
           <span class="text-xs font-bold text-slate-500 mr-1">組別分類：</span>
           <button onclick="setBandFilter('ALL')" id="filterBtnALL" class="band-filter-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow-sm">
@@ -74,32 +73,12 @@
           </select>
         </div>
 
-        <div id="currentQuestionBox" class="hidden space-y-3 pt-1">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span id="qBandBadge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-700">BAND 1</span>
-              <span id="qLangBadge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-700">中文</span>
-            </div>
-            <button onclick="toggleSampleAnswer()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition">
-              <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
-              <span id="sampleBtnText">觀看 AI 建議答案</span>
-            </button>
+        <div id="currentQuestionBox" class="hidden space-y-2 pt-1">
+          <div class="flex items-center gap-2">
+            <span id="qBandBadge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-700">BAND 1</span>
+            <span id="qLangBadge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-700">中文</span>
           </div>
           <h3 id="currentQuestionTitle" class="text-lg font-bold text-slate-800 leading-snug">--</h3>
-          <p id="currentQuestionDesc" class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">--</p>
-
-          <div id="sampleAnswerBox" class="hidden bg-amber-50/90 border border-amber-200 rounded-xl p-4 space-y-3 transition shadow-sm">
-            <div class="flex items-center justify-between border-b border-amber-200 pb-2">
-              <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
-                <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
-                <span>AI 面試官建議答案與答題框架</span>
-              </div>
-              <button onclick="speakText('sampleAnswerContent')" id="speakSampleBtn" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition shadow-sm">
-                <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 朗讀建議答案
-              </button>
-            </div>
-            <div id="sampleAnswerContent" class="text-xs text-amber-950 leading-relaxed whitespace-pre-wrap">--</div>
-          </div>
         </div>
       </div>
 
@@ -122,25 +101,44 @@
         </div>
 
         <button id="submitBtn" onclick="submitAnswerForAI()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition shadow-md">
-          <i data-lucide="sparkles" class="w-4 h-4"></i> 提交並進行深度 AI 分析
+          <i data-lucide="sparkles" class="w-4 h-4"></i> 提交並獲取 AI 點評
         </button>
       </div>
 
       <!-- AI Feedback Result -->
-      <div id="aiResultBox" class="hidden bg-white rounded-xl shadow-md border border-indigo-100 p-5 space-y-3">
+      <div id="aiResultBox" class="hidden bg-white rounded-xl shadow-md border border-indigo-100 p-5 space-y-4">
         <div class="flex justify-between items-center border-b border-slate-100 pb-2">
           <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
-            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官深度分析點評
+            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官分析點評
           </h3>
-          <div class="flex items-center gap-2">
-            <button onclick="speakText('aiFeedbackContent')" id="speakFeedbackBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition shadow-sm">
-              <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 朗讀評語與範例
-            </button>
-            <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-md hidden sm:inline-block">附詳細高分作答例子</span>
-          </div>
+          <button onclick="speakText('aiFeedbackContent')" id="speakFeedbackBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition shadow-sm">
+            <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 朗讀評語
+          </button>
         </div>
+        
         <div id="aiFeedbackContent" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 p-4 rounded-xl border border-slate-200">
           分析中...
+        </div>
+
+        <!-- 🌟 新增：看完回饋後才按需生成個人化建議答案的按鈕 -->
+        <div id="generateSampleActionArea" class="pt-1">
+          <button onclick="generatePersonalizedSample()" id="genSampleBtn" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition shadow-sm">
+            <i data-lucide="wand-2" class="w-4 h-4"></i> 結合我的作答生成建議答案
+          </button>
+        </div>
+
+        <!-- 按下按鈕後才展開的建議答案區塊 -->
+        <div id="personalizedSampleBox" class="hidden bg-amber-50/90 border border-amber-200 rounded-xl p-4 space-y-3 transition shadow-sm">
+          <div class="flex items-center justify-between border-b border-amber-200 pb-2">
+            <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
+              <span>專屬建議答案與答題參考</span>
+            </div>
+            <button onclick="speakText('personalizedSampleContent')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition shadow-sm">
+              <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 朗讀建議答案
+            </button>
+          </div>
+          <div id="personalizedSampleContent" class="text-sm text-amber-950 leading-relaxed whitespace-pre-wrap">--</div>
         </div>
       </div>
     </div>
@@ -226,12 +224,12 @@
 
       <div>
         <div class="flex justify-between items-center mb-1">
-          <label class="block text-xs font-semibold text-slate-600">答題提示 / AI 參考答案 (可選)</label>
+          <label class="block text-xs font-semibold text-slate-600">標準參考答案 / 評分關鍵字 (強烈建議填寫)</label>
           <button type="button" onclick="teacherGenerateAiAnswer()" id="teacherAiGenBtn" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded transition">
-            <i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成詳細參考答案
+            <i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成答題框架
           </button>
         </div>
-        <textarea id="qDescInput" rows="4" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="可手動輸入提示，或點擊右上角按鈕讓 AI 自動生成詳細參考答案與答題切入點..."></textarea>
+        <textarea id="qDescInput" rows="4" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="輸入此題的標準答案或關鍵要點。當學生點擊「生成建議答案」時，系統會結合學生作答與此標準答案進行引導..."></textarea>
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
@@ -270,8 +268,8 @@
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-600 mb-1">題目列表 (每行一道題)</label>
-        <textarea id="batchInput" rows="5" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="請你介紹一本你最喜歡的書。&#10;如果你獲得一筆獎學金，你會如何使用？"></textarea>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">題目列表 (每行一道題；支援「題目 | 標準答案」格式)</label>
+        <textarea id="batchInput" rows="6" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="格式範例 1（純題目）：&#10;請你介紹一本你最喜歡的書。&#10;&#10;格式範例 2（題目 + 專屬答案，用 | 分隔）：&#10;文中的句子:「請你把我的孩子安全地交回來!」,用了甚麼修辭手法? | 運用了「擬人」（兼「呼告」）修辭手法，把無生命的物件當作有感情的人來呼喚，表達作者對它的珍視。"></textarea>
       </div>
 
       <div class="flex justify-end gap-2">
@@ -321,7 +319,6 @@
       checkStudentAuth();
     });
 
-    // 語音朗讀 (Text-to-Speech)
     function speakText(elementId) {
       if (!('speechSynthesis' in window)) {
         alert('您的瀏覽器不支援語音朗讀功能。');
@@ -428,9 +425,9 @@
 
     function seedDefaultQuestions() {
       const defaults = {
-        'q1': { title: '請簡單介紹一下你自己的興趣與優點。', desc: '著重說明自己的獨特個人特色、閱讀偏好或課外活動。', band: 'Band 1', lang: '中文' },
-        'q2': { title: 'If you encounter a difficult problem during group project, how will you solve it?', desc: 'Explain teamwork and problem-solving skills clearly.', band: 'Band 1', lang: 'English' },
-        'q3': { title: '你平時最喜歡的一門科目是什麼？為什麼？', desc: '舉出具體的學習實例說明理由。', band: 'Band 2', lang: '中文' }
+        'q1': { title: '請簡單介紹一下你自己的興趣與優點。', desc: '', band: 'Band 1', lang: '中文' },
+        'q2': { title: 'If you encounter a difficult problem during group project, how will you solve it?', desc: '', band: 'Band 1', lang: 'English' },
+        'q3': { title: '你平時最喜歡的一門科目是什麼？為什麼？', desc: '', band: 'Band 2', lang: '中文' }
       };
       questions = defaults;
       syncQuestions();
@@ -495,9 +492,9 @@
               <span class="text-xs px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-700">${q.lang}</span>
               <h4 class="font-bold text-slate-800 text-xs sm:text-sm">${q.title}</h4>
             </div>
-            ${q.desc ? `<p class="text-xs text-slate-500">${q.desc}</p>` : ''}
+            ${q.desc ? `<p class="text-xs text-slate-500 line-clamp-2">標準參考：${q.desc}</p>` : '<p class="text-xs text-slate-400 italic">（未設定標準答案，將結合學生作答生成引導）</p>'}
           </div>
-          <div class="flex items-center gap-2 self-end sm:self-center">
+          <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
             <button onclick="editQuestion('${key}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1 rounded-lg transition font-medium">編輯</button>
             <button onclick="deleteQuestion('${key}')" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg transition font-medium">刪除</button>
           </div>
@@ -528,108 +525,219 @@
       document.getElementById('qBandBadge').innerText = q.band;
       document.getElementById('qLangBadge').innerText = q.lang;
       document.getElementById('currentQuestionTitle').innerText = q.title;
-      document.getElementById('currentQuestionDesc').innerText = q.desc || '無補充說明';
-      
-      document.getElementById('sampleAnswerBox').classList.add('hidden');
-      document.getElementById('sampleBtnText').innerText = '觀看 AI 建議答案';
       
       box.classList.remove('hidden');
       answerArea.classList.remove('hidden');
       document.getElementById('aiResultBox').classList.add('hidden');
+      document.getElementById('personalizedSampleBox').classList.add('hidden');
     }
 
-    function toggleSampleAnswer() {
-      const sampleBox = document.getElementById('sampleAnswerBox');
-      const btnText = document.getElementById('sampleBtnText');
-      const isHidden = sampleBox.classList.contains('hidden');
-
-      if (isHidden) {
-        const q = questions[currentQKey];
-        const isEnglish = q.lang === "English";
-        let sampleContent = "";
-
-        if (q.desc && q.desc.trim().length > 0 && q.desc.includes("示範答案")) {
-          sampleContent = q.desc;
-        } else {
-          sampleContent = generateDetailedSample(q.title, q.band, isEnglish);
-        }
-
-        document.getElementById('sampleAnswerContent').innerText = sampleContent;
-        sampleBox.classList.remove('hidden');
-        btnText.innerText = '隱藏建議答案';
-      } else {
-        sampleBox.classList.add('hidden');
-        btnText.innerText = '觀看 AI 建議答案';
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
-      }
-    }
-
-    // 🌟 動態分類語意生成引擎：依題目關鍵字自動匹配最佳高分範本
-    function generateDetailedSample(title, band, isEnglish) {
+    // 判斷是否為學科知識／閱讀理解題
+    function isAcademicQuestion(title) {
       const t = title.toLowerCase();
+      return t.includes('修辭') || t.includes('文中') || t.includes('句子') || t.includes('作者') || 
+             t.includes('段意') || t.includes('主旨') || t.includes('意思') || t.includes('解釋') ||
+             t.includes('成語') || t.includes('錯別字') || t.includes('標點') || t.includes('計算') ||
+             t.includes('面積') || t.includes('體積') || t.includes('分數') || t.includes('百分') ||
+             t.includes('grammar') || t.includes('passage') || t.includes('meaning') || t.includes('calculate');
+    }
 
-      // 1. 閱讀與書籍類
-      if (t.includes('書') || t.includes('閱讀') || t.includes('book') || t.includes('read') || t.includes('作者')) {
-        if (isEnglish) {
-          return `📌 【Recommended Structure (PREP Model)】:\n• Point: State your favorite book clearly.\n• Reason: Explain the core theme or takeaway.\n• Example: Connect a story event to your own life.\n• Point: Summarize how reading enriches your learning.\n\n📝 【${band} High-Score Sample Answer】:\n"Thank you for this question. My favorite book is 'The Little Prince'. The central message that 'what is essential is invisible to the eye' resonated deeply with me. During a group project last year, I learned to look past minor conflicts and understand my classmates' perspectives, much like the Little Prince learned to care for his rose. Reading this book taught me empathy and patience, qualities I hope to bring to your school."`;
-        } else {
-          return `📌 【推薦答題結構 (STAR 原則)】：\n• S (情境)：點出你最喜歡的一本書及其核心主題。\n• T (任務)：說明書中哪一段情節或觀點對你啟發最深。\n• A (行動)：具體分享你如何將書中道理應用在日常學習或生活中。\n• R (結果)：總結閱讀對你個人性格與思維的正面提升。\n\n📝 【${band} 高分作答範例】：\n「各位面試官老師好！針對『${title}』這個題目，我最喜愛的一本書是《夏洛的網》。這本書講述了真摯的友誼與承諾的力量。記得在小五參與校際接力賽時，我們隊伍起初因落後而士氣低落。我聯想到書中夏洛默默支持朋友的精神，便主動鼓勵隊友堅持到底，最終我們獲得了季軍。這本書讓我明白到承諾與團隊互信的可貴，也是我一直努力實踐的處事態度。」`;
+    // 🌟 第一階段：提交後只給針對性的「優缺點診斷與改進建議」，不直接給出範文
+    function submitAnswerForAI() {
+      const ans = document.getElementById('studentAnswer').value.trim();
+      if (!ans) {
+        alert('請先輸入或語音錄製答案！');
+        return;
+      }
+
+      const q = questions[currentQKey];
+      const resultBox = document.getElementById('aiResultBox');
+      const content = document.getElementById('aiFeedbackContent');
+      const sampleBox = document.getElementById('personalizedSampleBox');
+      const genBtn = document.getElementById('genSampleBtn');
+
+      resultBox.classList.remove('hidden');
+      sampleBox.classList.add('hidden');
+      genBtn.innerHTML = `<i data-lucide="wand-2" class="w-4 h-4"></i> 結合我的作答生成建議答案`;
+      lucide.createIcons();
+      
+      content.innerText = '⏳ AI 面試官正在分析你的作答內容與結構，請稍候...';
+
+      setTimeout(() => {
+        const isEnglish = q.lang === "English";
+        const ansLower = ans.toLowerCase();
+
+        const isTooShort = ans.length < 4;
+        const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
+        const isRefusal = ans.includes("不知道") || ans.includes("冇") || ans.includes("無") || ans.includes("don't know") || ans.includes("no idea");
+
+        if (isTooShort || isGibberish || isRefusal) {
+          content.innerText = isEnglish
+            ? `🟢 Strengths:\n• Attempted to submit an answer.\n\n🔴 Areas for Improvement:\n• Your response is too brief or states a refusal to answer ("I don't know").\n• In an interview, try to share at least 2-3 complete sentences addressing "${q.title}".\n\n👉 Need help getting started? Click the button below to generate a suggested answer structure.`
+            : `🟢 優點 (Strengths)：\n• 願意嘗試進行作答。\n\n🔴 缺點與改進方向 (Areas for Improvement)：\n• 回答內容過短、含有無意義字元或屬於拒絕回答（如「不知道」）。\n• 面對「${q.title}」時，即使沒有十足把握，也應該嘗試說出你的初步想法或推理過程。\n\n👉 如果不知道如何下筆，請點擊下方按鈕參考建議答案框架。`;
+          return;
         }
-      }
 
-      // 2. 個人特質、興趣與自介類
-      if (t.includes('興趣') || t.includes('優點') || t.includes('介紹') || t.includes('自己') || t.includes('hobby') || t.includes('strength') || t.includes('introduce')) {
+        const academic = isAcademicQuestion(q.title);
+        let strengths = [];
+        let weaknesses = [];
+
         if (isEnglish) {
-          return `📌 【Recommended Structure (PREP Model)】:\n• Point: Highlight your strongest personality trait or main hobby.\n• Reason: Explain why this trait helps you grow.\n• Example: Give a real primary school activity example.\n• Point: Express your desire to contribute to secondary school.\n\n📝 【${band} High-Score Sample Answer】:\n"Good morning teachers. Regarding '${title}', my greatest strength is my proactive attitude toward learning and active participation in extracurriculars. As a member of our school's robotics team, I spent months practicing coding and debugging under tight schedules. This experience honed my logical thinking and resilience. I am eager to apply these skills to secondary school academics and student society activities."`;
-        } else {
-          return `📌 【推薦答題結構 (STAR 原則)】：\n• S (情境)：開門見山點出自己的核心優點或特別興趣。\n• T (任務)：說明在小學活動中如何展現這項特質。\n• A (行動)：分享具體實踐過程與付出的努力。\n• R (結果)：最後獲得的成長與對中學生活的期望。\n\n📝 【${band} 高分作答範例】：\n「各位面試官老師好！針對『${title}』這個題目，我的核心優點是具備強烈的自主學習熱情與良好的時間管理能力。以小學六年為例，我除了維持優異學業外，還擔任學校風紀隊長與合唱團成員。在籌備畢業音樂會期間，我每天列出優先順序清單，既保證了練習時間，也按時完成功課。這份自律與熱誠，讓我能從容應對各種挑戰，我也非常期待將這份積極態度帶入貴校。」`;
-        }
-      }
+          if (ans.length >= 40) strengths.push(`• Good effort in expressing your ideas with ${ans.length} characters.`);
+          else weaknesses.push(`• Your answer is slightly brief (${ans.length} characters). Try expanding your explanation to 3-4 sentences.`);
 
-      // 3. 學科與學校生活類
-      if (t.includes('科目') || t.includes('課程') || t.includes('規則') || t.includes('獎學金') || t.includes('subject') || t.includes('rule') || t.includes('scholarship')) {
-        if (isEnglish) {
-          return `📌 【Recommended Structure (PREP Model)】:\n• Point: Clearly express your choice or idea.\n• Reason: Provide solid logical arguments.\n• Example: Cite a relevant classroom or school experience.\n• Point: Link to your future academic goals.\n\n📝 【${band} High-Score Sample Answer】:\n"Thank you for asking. Concerning '${title}', I believe that curiosity is the biggest driver in learning. For instance, in our Mathematics classes, I love exploring multiple methods to solve a single complex problem rather than just memorizing formulas. This analytical mindset not only boosted my academic confidence but also taught me to approach challenges from different angles, which will prepare me well for secondary school curriculum."`;
-        } else {
-          return `📌 【推薦答題結構 (STAR 原則)】：\n• S (情境)：直接回應題目主張或選擇。\n• T (任務)：說明該領域或學科帶給你的啟發與挑戰。\n• A (行動)：分享你如何主動探索與深入研習。\n• R (結果)：總結這對你未來中學學習的幫助。\n\n📝 【${band} 高分作答範例】：\n「各位面試官老師好！關於『${title}』這個課題，我的看法是：探究知識的過程比單純獲得答案更重要。以我學習科學科的經驗為例，我們在做植物光合作用實驗時遇到了實驗結果不標準的問題。我沒有直接抄寫課本結論，而是主動查閱資料並重新調配光照時間，最終獲得精準數據。這種求真嚴謹的學習態度，是我認為在中學階段繼續進步的關鍵。」`;
-        }
-      }
+          if (academic) {
+            if (ansLower.includes("because") || ansLower.includes("means") || ansLower.includes("shows")) {
+              strengths.push(`• Clear reasoning by explaining the meaning or rule behind your answer.`);
+            } else {
+              weaknesses.push(`• Try adding supporting evidence from the question (e.g., "This shows that..." or "Because...").`);
+            }
+          } else {
+            if (ansLower.includes("example") || ansLower.includes("experience") || ansLower.includes("when i") || ansLower.includes("last")) {
+              strengths.push(`• Great job supporting your point with a personal experience or concrete example!`);
+            } else {
+              weaknesses.push(`• Adding a specific personal example (e.g., "For instance, at school...") will make your answer much stronger.`);
+            }
+          }
 
-      // 4. 挫敗與克服困難類
-      if (t.includes('困難') || t.includes('挫敗') || t.includes('失敗') || t.includes('克服') || t.includes('difficult') || t.includes('problem') || t.includes('challenge')) {
-        if (isEnglish) {
-          return `📌 【Recommended Structure (PREP Model)】:\n• Point: State your main belief in tackling hardship.\n• Reason: Explain the role of teamwork and resilience.\n• Example: Detail a time a school project hit a bottleneck.\n• Point: Show how you overcome obstacles.\n\n📝 【${band} High-Score Sample Answer】:\n"Thank you for this question. Regarding '${title}', I believe staying calm and fostering open communication are key to solving any crisis. During our science exhibition last term, our group's model collapsed right before judging. As team leader, I quickly assigned tasks, focused on rebuilding the base, and encouraged everyone. In the end, we passed the evaluation smoothly. This taught me that challenges are opportunities to grow."`;
+          content.innerText = `🟢 Strengths:\n${strengths.join("\n") || "• Clear initial attempt to answer the question."}\n\n🔴 Areas for Improvement:\n${weaknesses.join("\n") || "• Good structure! Focus on natural pronunciation and confidence."}\n\n👉 Want to see how your answer can be upgraded? Click the button below!`;
         } else {
-          return `📌 【推薦答題結構 (STAR 原則)】：\n• S (情境)：點出面對『${title}』時的核心態度。\n• T (任務)：說明當時團隊或個人面臨的緊迫困境。\n• A (行動)：具體說明採取的解決步驟（冷靜分析、分工、溝通）。\n• R (結果)：獲得的成果與心態上的突破。\n\n📝 【${band} 高分作答範例】：\n「各位面試官老師好！針對『${title}』這個題目，我的看法是：保持積極主動與同理心溝通，是克服困難的關鍵。以小六專題研習為例，當時組員意見分歧且時間緊迫。我主動擔任協調者，建議大家列表分析方案優缺點並投票決定。最終我們按時完成報告並獲得好評。這次經歷讓我明白冷靜溝通比執著個人意見更重要。」`;
-        }
-      }
+          if (academic) {
+            // 學科知識題診斷
+            if (ans.length >= 10) strengths.push(`• 能夠用完整句子回應學科問題（共 ${ans.length} 字），態度認真。`);
+            else weaknesses.push(`• 回答較為簡短（目前 ${ans.length} 字），建議除了說出答案名稱外，再補上一句解釋原因或作用。`);
 
-      // 5. 通用/其他題目類
-      if (isEnglish) {
-        return `📌 【Recommended Structure (PREP Model)】:\n• Point: Express a clear and confident perspective on "${title}".\n• Reason: Elaborate with logical reasoning.\n• Example: Connect with personal school life experience.\n• Point: Summarize with positive ambition.\n\n📝 【${band} High-Score Sample Answer】:\n"Thank you for asking this thought-provoking question about '${title}'. From my perspective, maintaining an open mind and a strong sense of responsibility is crucial. Throughout my primary school years, whether serving as a class monitor or working on group assignments, I always aimed to listen attentively and execute tasks diligently. I am eager to bring this enthusiastic mindset to your esteemed school."`;
-      } else {
-        return `📌 【推薦答題結構 (STAR 原則)】：\n• S (情境)：開門見山發表對「${title}」的核心觀點。\n• T (任務)：說明該議題背後的思考重點或學習價值。\n• A (行動)：結合個人在小學生活或課外活動中的實際體會。\n• R (結果)：總結回答，展現升讀中學的自信與期待。\n\n📝 【${band} 高分作答範例】：\n「各位面試官老師好！針對『${title}』這個題目，我的核心看法是：保持開放思考與責任感是處理問題的基礎。在小學擔任班長及參與各類校園活動的過程中，我養成了仔細聽取他人意見並果斷執行的習慣。這段歷練培養了我的邏輯表達能力與團隊合作精神，我也期待將這份熱忱帶入貴校的中學生活。」`;
-      }
+            if (ansLower.includes("因為") || ansLower.includes("表達") || ansLower.includes("作用") || ansLower.includes("意思") || ansLower.includes("說明")) {
+              strengths.push(`• 具備解題邏輯，嘗試闡述背後的原理或修辭效果。`);
+            } else {
+              weaknesses.push(`• 建議在答案中加入「因為……表達了……的作用」等分析字眼，令答案更完整。`);
+            }
+
+            // 如果老師有設定標準答案，檢查學生是否命中關鍵字
+            if (q.desc && q.desc.trim().length > 0) {
+              const keywords = q.desc.match(/「([^」]+)」/g);
+              if (keywords && keywords.length > 0) {
+                const cleanKeys = keywords.map(k => k.replace(/[「」]/g, ''));
+                const hit = cleanKeys.some(k => ans.includes(k));
+                if (hit) {
+                  strengths.push(`• 準確命中本題的核心關鍵詞（${cleanKeys.join(' / ')}）！`);
+                } else {
+                  weaknesses.push(`• 答案似乎未提及本題的核心概念（提示方向：${cleanKeys.join(' / ')}），建議再仔細審題。`);
+                }
+              }
+            }
+          } else {
+            // 一般面試題診斷
+            if (ans.length >= 35) strengths.push(`• 作答篇幅充實（已達 ${ans.length} 字），展現了良好的表達意願。`);
+            else weaknesses.push(`• 字數稍顯不足（目前僅 ${ans.length} 字），建議補充更多細節，擴充至 3-4 句完整句子。`);
+
+            const exampleWords = ["例如", "記得有一次", "上學期", "經驗", "曾經", "例子", "在學校", "參加"];
+            if (exampleWords.some(w => ansLower.includes(w))) {
+              strengths.push(`• 能夠結合個人生活或校園事例來支持觀點，具說服力。`);
+            } else {
+              weaknesses.push(`• 缺乏具體的個人事例支撐，建議加入「例如在學校……」的真實經驗。`);
+            }
+
+            const logicWords = ["因為", "所以", "此外", "總括而言", "第一", "第二", "因此"];
+            if (logicWords.some(w => ansLower.includes(w))) {
+              strengths.push(`• 邏輯清晰，能善用關聯詞組織句子。`);
+            } else {
+              weaknesses.push(`• 建議使用「第一……此外……總括來說……」等連接詞，令條理更分明。`);
+            }
+          }
+
+          content.innerText = `🟢 優點 (Strengths)：\n${strengths.join("\n") || "• 具備基本答題意願，勇於表達。"}\n\n🔴 缺點與改進方向 (Areas for Improvement)：\n${weaknesses.join("\n") || "• 整體表現不錯！繼續保持自信與流暢度。"}\n\n👉 看完評語後，如果想參考如何把你的答案潤飾得更好，請點擊下方按鈕！`;
+        }
+      }, 500);
+    }
+
+    // 🌟 第二階段：當學生看完回饋後，按鍵才結合「學生剛才的作答 + 題目類型 + 教師標準答案」生成精準建議
+    function generatePersonalizedSample() {
+      const q = questions[currentQKey];
+      const studentAns = document.getElementById('studentAnswer').value.trim();
+      const isEnglish = q.lang === "English";
+      const sampleBox = document.getElementById('personalizedSampleBox');
+      const sampleContent = document.getElementById('personalizedSampleContent');
+      const btn = document.getElementById('genSampleBtn');
+
+      btn.innerText = "正在結合你的作答生成建議...";
+
+      setTimeout(() => {
+        let output = "";
+
+        // 1. 若教師有設定專屬標準答案，優先顯示教師標準答案
+        if (q.desc && q.desc.trim().length > 0) {
+          output += isEnglish
+            ? `📌 【Teacher's Standard Reference Answer】:\n${q.desc.trim()}\n\n`
+            : `📌 【教師設定標準參考答案】：\n${q.desc.trim()}\n\n`;
+        }
+
+        // 2. 根據題型與學生剛才輸入的實際內容，生成針對性的改寫與引導
+        const academic = isAcademicQuestion(q.title);
+        const hasValidStudentInput = studentAns.length >= 4 && !studentAns.includes("不知道") && !studentAns.includes("冇");
+
+        if (academic) {
+          if (isEnglish) {
+            output += `💡 【How to Structure Your Answer】:\n• Step 1: Directly state the core answer to "${q.title}".\n• Step 2: Quote the exact words from the question as evidence.\n• Step 3: Explain the effect or reasoning clearly.`;
+            if (hasValidStudentInput) {
+              output += `\n\n✨ 【Polished Version Based on Your Input】:\n"Thank you for this question. Based on the sentence, ${studentAns.replace(/\.$/, '')}. Looking closely at the wording, the author uses this expression to emphasize the emotion and convey a vivid meaning to the reader."`;
+            }
+          } else {
+            output += `💡 【學科／閱讀題高分作答公式】:\n1. 直接點題：開門見山說出正確答案（例如修辭手法名稱、中心思想或計算結果）。\n2. 引用原文：指出題目中的關鍵字詞作為依據。\n3. 說明作用：解釋這樣寫帶來的表達效果。`;
+            if (hasValidStudentInput) {
+              const cleanAns = studentAns.replace(/[。！!]$/, '');
+              output += `\n\n✨ 【結合你剛才想法的潤飾示範】:\n「各位老師好！針對『${q.title}』這道題目，我的答案是：${cleanAns}。從句子的用詞可以看出，作者透過這樣的寫法，能夠更加生動形象地表達出當中的真摯情感，令讀者產生共鳴。」`;
+            } else if (!q.desc) {
+              output += `\n\n✨ 【作答句式參考】:\n「各位老師好！針對『${q.title}』，這句運用了【請填入修辭／概念】，因為作者將【題目關鍵詞】賦予了生動的表達效果，突出了文章的中心思想。」`;
+            }
+          }
+        } else {
+          // 個人觀點與經驗面試題：將學生的實際回答嵌入 PREP / STAR 升級框架中
+          if (isEnglish) {
+            output += `💡 【${q.band} Interview Upgrade Framework (PREP)】:\n• Point: State your main idea clearly.\n• Reason & Example: Expand on your own thoughts with a real example.\n• Conclusion: Connect back to your enthusiasm for secondary school.\n\n`;
+            if (hasValidStudentInput) {
+              const cleanAns = studentAns.replace(/\.$/, '');
+              output += `✨ 【Upgraded Version Based on Your Answer】:\n"Good morning teachers. Regarding '${q.title}', my core perspective is that ${cleanAns}. In my primary school experience, practicing this mindset helped me overcome challenges and work effectively with my classmates. I look forward to bringing this positive attitude to your school."`;
+            } else {
+              output += `✨ 【Suggested Answer Template】:\n"Good morning teachers. In response to '${q.title}', I believe that maintaining a positive and proactive attitude is essential. For example, during primary school group projects, I always listen carefully to teammates and take responsibility for my tasks. I hope to continue growing at your school."`;
+            }
+          } else {
+            output += `💡 【${q.band} 面試升級架構（保留你的原意並加強結構）】:\n• 開頭點題：直接帶出你的核心想法。\n• 展開說明：把你剛才提到的重點加上具體理由或校園事例。\n• 結尾昇華：連結到你對中學生活的期待。\n\n`;
+            if (hasValidStudentInput) {
+              const cleanAns = studentAns.replace(/[。！!]$/, '');
+              output += `✨ 【結合你剛才想法的潤飾示範】:\n「各位面試官老師好！針對『${q.title}』這個題目，我的看法是：${cleanAns}。以我在小學的學習與校園生活經驗為例，這份體會讓我學會了更加主動思考與與人合作。總括而言，我希望能將這份積極的態度帶入貴校的中學生活，不斷自我提升。」`;
+            } else {
+              output += `✨ 【作答句式參考】:\n「各位面試官老師好！針對『${q.title}』這個題目，我的核心看法是：【說出你的立場】。原因主要有兩點：第一，這能培養我們的責任感；第二，在日常生活與學習中也非常受用。總括而言，保持積極開放的態度是我一直努力的方向。」`;
+            }
+          }
+        }
+
+        sampleContent.innerText = output.trim();
+        sampleBox.classList.remove('hidden');
+        btn.innerHTML = `<i data-lucide="refresh-cw" class="w-4 h-4"></i> 重新生成建議答案`;
+        lucide.createIcons();
+      }, 400);
     }
 
     function teacherGenerateAiAnswer() {
       const title = document.getElementById('qTitleInput').value.trim();
-      const band = document.getElementById('qBand').value;
-      const lang = document.getElementById('qLang').value;
       const btn = document.getElementById('teacherAiGenBtn');
 
       if (!title) {
-        alert("請先輸入題目內容，AI 才能為您生成建議答案！");
+        alert("請先輸入題目內容！");
         return;
       }
 
       btn.innerText = "生成中...";
       setTimeout(() => {
-        const generatedText = generateDetailedSample(title, band, lang === "English");
-        document.getElementById('qDescInput').value = generatedText;
-        btn.innerHTML = `<i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成詳細參考答案`;
+        if (isAcademicQuestion(title)) {
+          document.getElementById('qDescInput').value = `1. 直接說出核心答案（如修辭名稱／概念）；\n2. 引用題目關鍵字詞作證；\n3. 說明表達效果與作用。`;
+        } else {
+          document.getElementById('qDescInput').value = `建議作答重點：\n1. 開門見山表達個人立場或特質；\n2. 舉出一個具體的小學學習或生活事例；\n3. 總結個人反思與對中學的期望。`;
+        }
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成答題框架`;
         lucide.createIcons();
-      }, 600);
+      }, 300);
     }
 
     function setupSpeechRecognition() {
@@ -699,104 +807,6 @@
 
     function clearAnswer() {
       document.getElementById('studentAnswer').value = '';
-    }
-
-    function submitAnswerForAI() {
-      const ans = document.getElementById('studentAnswer').value.trim();
-      if (!ans) {
-        alert('請先輸入或語音錄製答案！');
-        return;
-      }
-
-      const q = questions[currentQKey];
-      const resultBox = document.getElementById('aiResultBox');
-      const content = document.getElementById('aiFeedbackContent');
-
-      resultBox.classList.remove('hidden');
-      content.innerText = '⏳ AI 面試官正在進行多維度深度語意比對與內容分析，請稍候...';
-
-      setTimeout(() => {
-        const isEnglish = q.lang === "English";
-        const titleLower = q.title.toLowerCase();
-        const ansLower = ans.toLowerCase();
-
-        const isTooShort = ans.length < 10;
-        const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
-        const isRefusal = ans.includes("不知道") || ans.includes("冇") || ans.includes("無") || ans.includes("don't know") || ans.includes("no idea");
-
-        const sampleText = generateDetailedSample(q.title, q.band, isEnglish);
-
-        if (isTooShort || isGibberish || isRefusal) {
-          content.innerText = isEnglish
-            ? `🟢 Strengths:\n• Entered a response in the text area.\n\n🔴 Areas for Improvement:\n• The answer is too brief, nonsensical, or states a refusal to answer.\n• Failing to address "${q.title}" with meaningful content shows a lack of preparation.\n\n💡 Suggestions & High-Score Sample Answer:\n${sampleText}`
-            : `🟢 優點 (Strengths)：\n• 學生嘗試進行了輸入作答。\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n• 回答內容過短（未滿10字）、含有無意義字元或屬於拒絕回答（如「不知道」）。\n• 完全未針對題目「${q.title}」展開說明，在升中面試中會被扣減態度分數。\n\n💡 具體建議與針對本題的高分作答例子：\n${sampleText}`;
-          return;
-        }
-
-        const keywordSets = [
-          { keys: ["興趣", "優點", "自介", "介紹", "hobby", "strength", "introduce", "myself"], topic: "個人特質" },
-          { keys: ["書", "閱讀", "喜歡", "作者", "主角", "book", "read", "author", "story"], topic: "閱讀心得" },
-          { keys: ["困難", "挫敗", "挑戰", "解決", "克服", "difficult", "problem", "solve", "challenge"], topic: "解決問題能力" },
-          { keys: ["組員", "合作", "小組", "團隊", "分工", "team", "group", "collaborate", "peer"], topic: "團隊合作" },
-          { keys: ["科目", "學科", "最喜愛", "數學", "英文", "中文", "科學", "subject", "favorite", "math", "english", "science"], topic: "學科興趣" }
-        ];
-
-        let matchedTopic = "";
-        keywordSets.forEach(set => {
-          if (set.keys.some(k => titleLower.includes(k))) matchedTopic = set.topic;
-        });
-
-        let hasRelevantWords = true;
-        if (matchedTopic) {
-          const currentSet = keywordSets.find(s => s.topic === matchedTopic);
-          hasRelevantWords = currentSet.keys.some(k => ansLower.includes(k));
-        }
-
-        const exampleWords = ["例如", "記得有一次", "上學期", "經驗", "經驗是", "曾經", "例子", "for example", "instance", "last year", "experience", "when i"];
-        const hasExample = exampleWords.some(w => ansLower.includes(w));
-
-        const logicWords = ["因為", "所以", "此外", "總括而言", "第一", "第二", "但是", "therefore", "because", "besides", "however", "in conclusion"];
-        const hasLogic = logicWords.some(w => ansLower.includes(w));
-
-        let strengths = [];
-        let weaknesses = [];
-
-        if (isEnglish) {
-          if (hasRelevantWords) strengths.push(`• Directly addresses the core topic of "${q.title}".`);
-          else weaknesses.push(`• Your answer lacks key vocabulary directly related to "${q.title}". It feels slightly off-topic.`);
-
-          if (ans.length > 50) strengths.push(`• Good overall response length, demonstrating effort in elaboration.`);
-          else weaknesses.push(`• The answer length is a bit short. Aim for at least 3-4 full sentences.`);
-
-          if (hasExample) strengths.push(`• Great job supporting your opinion with specific personal experiences or examples!`);
-          else weaknesses.push(`• Missing specific personal stories or concrete examples to back up your points.`);
-
-          if (hasLogic) strengths.push(`• Well-structured sentence organization using logical connectors.`);
-          else weaknesses.push(`• Sentence structures could be improved by using connective words (e.g., 'Because', 'Therefore', 'For instance').`);
-
-        } else {
-          if (hasRelevantWords) strengths.push(`• 回答緊扣題目「${q.title}」的核心主題，沒有離題。`);
-          else weaknesses.push(`• 答案中缺少與「${q.title}」直接相關的核心關鍵詞，給人偏題或套用通用模板的感覺。`);
-
-          if (ans.length >= 40) strengths.push(`• 作答篇幅充實（已達 ${ans.length} 字），展現了良好的答題誠意與表達意願。`);
-          else weaknesses.push(`• 字數稍顯不足（目前僅 ${ans.length} 字），建議補充更多細節，使回答擴充至 3-4 句完整句子。`);
-
-          if (hasExample) strengths.push(`• 非常優秀！能夠運用「例如/記得有一次」等具體個人經歷來支持觀點，大幅增加說服力。`);
-          else weaknesses.push(`• 缺乏具體的個人生活事例或學習經驗支撐，使回答顯得較為空洞泛談。`);
-
-          if (hasLogic) strengths.push(`• 邏輯層次分明，能夠善用「因為、所以、此外」等連接詞結構化表達。`);
-          else weaknesses.push(`• 句式結構較為單一，建議多使用關聯詞（如：第一……此外……總括來說……）強化條理性。`);
-        }
-
-        let finalOutput = "";
-        if (isEnglish) {
-          finalOutput = `🟢 Strengths:\n${strengths.join("\n") || "• Attempted to answer in English."}\n\n🔴 Areas for Improvement:\n${weaknesses.join("\n") || "• Minor adjustments needed for better vocabulary fluency."}\n\n💡 Suggestions & High-Score Sample Answer:\n${sampleText}`;
-        } else {
-          finalOutput = `🟢 優點 (Strengths)：\n${strengths.join("\n") || "• 具備基本答題意願。"}\n\n🔴 缺點與改進空間 (Areas for Improvement)：\n${weaknesses.join("\n") || "• 表達流暢，可進一步深化細節。"}\n\n💡 具體建議與針對本題的高分作答例子：\n${sampleText}`;
-        }
-
-        content.innerText = finalOutput;
-      }, 1000);
     }
 
     function toggleModePrompt() {
@@ -898,7 +908,6 @@
     }
 
     function generateAiQuestions() {
-      const band = document.getElementById('batchBand').value;
       const lang = document.getElementById('batchLang').value;
       const btn = document.getElementById('aiGenBtn');
       
@@ -921,7 +930,7 @@
         document.getElementById('batchInput').value = aiResults.join('\n');
         btn.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI 生成小六題目`;
         lucide.createIcons();
-      }, 1000);
+      }, 500);
     }
 
     function saveBatchQuestions() {
@@ -929,15 +938,26 @@
       const band = document.getElementById('batchBand').value;
       const lang = document.getElementById('batchLang').value;
 
+      let addedCount = 0;
       lines.forEach((line) => {
         const text = line.trim();
         if (text) {
-          const key = `q_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-          questions[key] = { title: text, desc: '', band: band, lang: lang };
+          const parts = text.split('|');
+          const title = parts[0].trim();
+          const desc = parts.length > 1 ? parts.slice(1).join('|').trim() : '';
+          
+          if (title) {
+            const key = `q_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+            questions[key] = { title: title, desc: desc, band: band, lang: lang };
+            addedCount++;
+          }
         }
       });
 
-      syncQuestions();
+      if (addedCount > 0) {
+        syncQuestions();
+        alert(`成功匯入 ${addedCount} 道題目！`);
+      }
       closeModal('batchModal');
     }
 
