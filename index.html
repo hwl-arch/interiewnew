@@ -43,7 +43,7 @@
       <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
         <div>
           <h2 class="font-bold text-indigo-900 text-lg">🎓 聖馬太學生練習區</h2>
-          <p class="text-xs text-indigo-700">先嘗試自行作答並查看 AI 評語，再按需生成專屬建議答案與語音朗讀！</p>
+          <p class="text-xs text-indigo-700">先嘗試自行作答並查看評語，再按需生成建議答案或複製內容前往 Gemini 潤飾！</p>
         </div>
         <span class="text-xs bg-indigo-200 text-indigo-800 px-2.5 py-1 rounded-md font-medium" id="questionCountBadge">0 道題目</span>
       </div>
@@ -101,7 +101,7 @@
         </div>
 
         <button id="submitBtn" onclick="submitAnswerForAI()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition shadow-md">
-          <i data-lucide="sparkles" class="w-4 h-4"></i> 提交並獲取 AI 點評
+          <i data-lucide="sparkles" class="w-4 h-4"></i> 提交並獲取分析點評
         </button>
       </div>
 
@@ -109,7 +109,7 @@
       <div id="aiResultBox" class="hidden bg-white rounded-xl shadow-md border border-indigo-100 p-5 space-y-4">
         <div class="flex justify-between items-center border-b border-slate-100 pb-2">
           <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
-            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> AI 面試官分析點評
+            <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i> 面試官分析點評
           </h3>
           <button onclick="speakText('aiFeedbackContent')" id="speakFeedbackBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition shadow-sm">
             <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 朗讀評語
@@ -120,14 +120,30 @@
           分析中...
         </div>
 
-        <!-- 🌟 新增：看完回饋後才按需生成個人化建議答案的按鈕 -->
-        <div id="generateSampleActionArea" class="pt-1">
+        <!-- 看完回饋後的操作區 -->
+        <div id="generateSampleActionArea" class="space-y-3 pt-1">
           <button onclick="generatePersonalizedSample()" id="genSampleBtn" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition shadow-sm">
-            <i data-lucide="wand-2" class="w-4 h-4"></i> 結合我的作答生成建議答案
+            <i data-lucide="wand-2" class="w-4 h-4"></i> 結合我的作答生成建議答案（本頁即時生成）
           </button>
+
+          <!-- 獨立雙按鈕：一鍵複製內容 ＋ 一鍵跳轉 Gemini 網站 -->
+          <div class="bg-indigo-50/80 border border-indigo-200 rounded-xl p-3.5 space-y-2.5">
+            <p class="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
+              想用 Gemini 模型生成更進階的個人化高分範文？請按以下兩步操作：
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <button onclick="copyPromptOnly()" id="copyPromptBtn" class="bg-white border-2 border-indigo-600 text-indigo-700 hover:bg-indigo-100 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition">
+                <i data-lucide="copy" class="w-4 h-4"></i> 1. 複製題目與作答內容
+              </button>
+              <a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-95 text-white py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition">
+                <i data-lucide="external-link" class="w-4 h-4"></i> 2. 跳轉至 Gemini 網站貼上
+              </a>
+            </div>
+          </div>
         </div>
 
-        <!-- 按下按鈕後才展開的建議答案區塊 -->
+        <!-- 按下按鈕後才展開的本頁建議答案區塊 -->
         <div id="personalizedSampleBox" class="hidden bg-amber-50/90 border border-amber-200 rounded-xl p-4 space-y-3 transition shadow-sm">
           <div class="flex items-center justify-between border-b border-amber-200 pb-2">
             <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
@@ -145,14 +161,14 @@
 
     <!-- Teacher View -->
     <div id="teacherView" class="hidden space-y-4">
-      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex justify-between items-center">
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h2 class="font-bold text-amber-900 text-base flex items-center gap-2">
             <i data-lucide="shield-check" class="w-5 h-5"></i> 教師管理後台
           </h2>
-          <p class="text-xs text-amber-700">您可以管理題目、修改教師/學生密碼或批量匯入題目。</p>
+          <p class="text-xs text-amber-700">免 API Key 零成本架構：支援雲端同步題庫、一鍵複製並跳轉 Gemini 輔助出題。</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <button onclick="openStudentPasswordModal()" class="bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition">修改學生密碼</button>
           <button onclick="openPasswordModal()" class="bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition">修改教師密碼</button>
           <button onclick="exitTeacherMode()" class="bg-amber-600 text-white hover:bg-amber-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition">返回學生模式</button>
@@ -164,7 +180,7 @@
         <h3 class="font-bold text-slate-700 text-base">題庫管理 (<span id="teacherQCount">0</span>)</h3>
         <div class="flex items-center gap-2">
           <button onclick="openBatchModal()" class="bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
-            <i data-lucide="layers" class="w-4 h-4"></i> 批量/AI生成
+            <i data-lucide="layers" class="w-4 h-4"></i> 批量/範本生成
           </button>
           <button onclick="openAddModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
             <i data-lucide="plus" class="w-4 h-4"></i> 單條新增
@@ -224,12 +240,12 @@
 
       <div>
         <div class="flex justify-between items-center mb-1">
-          <label class="block text-xs font-semibold text-slate-600">標準參考答案 / 評分關鍵字 (強烈建議填寫)</label>
+          <label class="block text-xs font-semibold text-slate-600">教師設定標準答案 / 評分重點 (強烈建議填寫)</label>
           <button type="button" onclick="teacherGenerateAiAnswer()" id="teacherAiGenBtn" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded transition">
-            <i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成答題框架
+            <i data-lucide="sparkles" class="w-3 h-3"></i> 填入答題框架
           </button>
         </div>
-        <textarea id="qDescInput" rows="4" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="輸入此題的標準答案或關鍵要點。當學生點擊「生成建議答案」時，系統會結合學生作答與此標準答案進行引導..."></textarea>
+        <textarea id="qDescInput" rows="4" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="填寫此題的標準答案或關鍵詞。當學生點擊「生成建議答案」時，系統會結合學生作答與此標準答案進行引導..."></textarea>
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
@@ -243,9 +259,9 @@
   <div id="batchModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-xl w-full p-5 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center">
-        <h3 class="font-bold text-slate-800 text-base">批量新增 / AI 生成題目</h3>
+        <h3 class="font-bold text-slate-800 text-base">批量新增題目</h3>
         <button onclick="generateAiQuestions()" id="aiGenBtn" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-90 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI 生成小六題目
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> 載入精選小六題庫
         </button>
       </div>
 
@@ -492,7 +508,7 @@
               <span class="text-xs px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-700">${q.lang}</span>
               <h4 class="font-bold text-slate-800 text-xs sm:text-sm">${q.title}</h4>
             </div>
-            ${q.desc ? `<p class="text-xs text-slate-500 line-clamp-2">標準參考：${q.desc}</p>` : '<p class="text-xs text-slate-400 italic">（未設定標準答案，將結合學生作答生成引導）</p>'}
+            ${q.desc ? `<p class="text-xs text-slate-500 line-clamp-2">標準參考：${q.desc}</p>` : '<p class="text-xs text-slate-400 italic">（未設定標準答案，將結合題型與學生作答引導）</p>'}
           </div>
           <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
             <button onclick="editQuestion('${key}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1 rounded-lg transition font-medium">編輯</button>
@@ -532,17 +548,28 @@
       document.getElementById('personalizedSampleBox').classList.add('hidden');
     }
 
-    // 判斷是否為學科知識／閱讀理解題
-    function isAcademicQuestion(title) {
+    function classifyQuestionType(title) {
       const t = title.toLowerCase();
-      return t.includes('修辭') || t.includes('文中') || t.includes('句子') || t.includes('作者') || 
-             t.includes('段意') || t.includes('主旨') || t.includes('意思') || t.includes('解釋') ||
-             t.includes('成語') || t.includes('錯別字') || t.includes('標點') || t.includes('計算') ||
-             t.includes('面積') || t.includes('體積') || t.includes('分數') || t.includes('百分') ||
-             t.includes('grammar') || t.includes('passage') || t.includes('meaning') || t.includes('calculate');
+      if (t.includes('修辭') || t.includes('文中') || t.includes('句子') || t.includes('作者') || 
+          t.includes('段意') || t.includes('主旨') || t.includes('意思') || t.includes('解釋') ||
+          t.includes('成語') || t.includes('錯別字') || t.includes('計算') || t.includes('grammar') || t.includes('meaning')) {
+        return 'ACADEMIC';
+      }
+      if (t.includes('介紹') || t.includes('優點') || t.includes('缺點') || t.includes('興趣') || 
+          t.includes('愛好') || t.includes('特質') || t.includes('introduce') || t.includes('yourself') || t.includes('hobby')) {
+        return 'SELF_INTRO';
+      }
+      if (t.includes('如果') || t.includes('遇到') || t.includes('困難') || t.includes('衝突') || 
+          t.includes('解決') || t.includes('怎麼辦') || t.includes('if you') || t.includes('problem') || t.includes('conflict')) {
+        return 'SITUATIONAL';
+      }
+      if (t.includes('書') || t.includes('閱讀') || t.includes('科目') || t.includes('學校') || 
+          t.includes('中學') || t.includes('book') || t.includes('subject') || t.includes('school')) {
+        return 'SCHOOL_READING';
+      }
+      return 'OPINION';
     }
 
-    // 🌟 第一階段：提交後只給針對性的「優缺點診斷與改進建議」，不直接給出範文
     function submitAnswerForAI() {
       const ans = document.getElementById('studentAnswer').value.trim();
       if (!ans) {
@@ -555,83 +582,62 @@
       const content = document.getElementById('aiFeedbackContent');
       const sampleBox = document.getElementById('personalizedSampleBox');
       const genBtn = document.getElementById('genSampleBtn');
+      const copyBtn = document.getElementById('copyPromptBtn');
 
       resultBox.classList.remove('hidden');
       sampleBox.classList.add('hidden');
-      genBtn.innerHTML = `<i data-lucide="wand-2" class="w-4 h-4"></i> 結合我的作答生成建議答案`;
+      genBtn.innerHTML = `<i data-lucide="wand-2" class="w-4 h-4"></i> 結合我的作答生成建議答案（本頁即時生成）`;
+      copyBtn.innerHTML = `<i data-lucide="copy" class="w-4 h-4"></i> 1. 複製題目與作答內容`;
+      copyBtn.classList.remove('bg-emerald-50', 'border-emerald-600', 'text-emerald-700');
+      copyBtn.classList.add('bg-white', 'border-indigo-600', 'text-indigo-700');
       lucide.createIcons();
-      
-      content.innerText = '⏳ AI 面試官正在分析你的作答內容與結構，請稍候...';
+
+      content.innerText = '⏳ 正在分析你的作答內容與結構，請稍候...';
 
       setTimeout(() => {
         const isEnglish = q.lang === "English";
         const ansLower = ans.toLowerCase();
+        const qType = classifyQuestionType(q.title);
 
         const isTooShort = ans.length < 4;
-        const isGibberish = /^[a-zA-Z0-9\s]+$/.test(ans) && !ans.includes(" ") && ans.length > 3;
         const isRefusal = ans.includes("不知道") || ans.includes("冇") || ans.includes("無") || ans.includes("don't know") || ans.includes("no idea");
 
-        if (isTooShort || isGibberish || isRefusal) {
+        if (isTooShort || isRefusal) {
           content.innerText = isEnglish
-            ? `🟢 Strengths:\n• Attempted to submit an answer.\n\n🔴 Areas for Improvement:\n• Your response is too brief or states a refusal to answer ("I don't know").\n• In an interview, try to share at least 2-3 complete sentences addressing "${q.title}".\n\n👉 Need help getting started? Click the button below to generate a suggested answer structure.`
-            : `🟢 優點 (Strengths)：\n• 願意嘗試進行作答。\n\n🔴 缺點與改進方向 (Areas for Improvement)：\n• 回答內容過短、含有無意義字元或屬於拒絕回答（如「不知道」）。\n• 面對「${q.title}」時，即使沒有十足把握，也應該嘗試說出你的初步想法或推理過程。\n\n👉 如果不知道如何下筆，請點擊下方按鈕參考建議答案框架。`;
+            ? `🟢 Strengths:\n• Attempted to submit an answer.\n\n🔴 Areas for Improvement:\n• Your response is too brief or states "I don't know". Try writing at least 2-3 complete sentences addressing "${q.title}".\n\n👉 Need inspiration? Click the buttons below to generate a suggested answer!`
+            : `🟢 優點 (Strengths)：\n• 願意嘗試進行作答。\n\n🔴 缺點與改進方向 (Areas for Improvement)：\n• 回答內容過短或屬於拒絕回答（如「不知道」）。面對「${q.title}」，請先嘗試寫出你自己的想法（即使只有一兩句也可以），系統才能幫你量身潤飾喔！\n\n👉 你可以先在上方作答區補充你的想法再按提交，或使用下方按鈕前往 Gemini 生成範文。`;
           return;
         }
 
-        const academic = isAcademicQuestion(q.title);
         let strengths = [];
         let weaknesses = [];
 
         if (isEnglish) {
           if (ans.length >= 40) strengths.push(`• Good effort in expressing your ideas with ${ans.length} characters.`);
-          else weaknesses.push(`• Your answer is slightly brief (${ans.length} characters). Try expanding your explanation to 3-4 sentences.`);
+          else weaknesses.push(`• Your answer is a bit brief (${ans.length} characters). Try expanding your explanation to 3-4 sentences.`);
 
-          if (academic) {
-            if (ansLower.includes("because") || ansLower.includes("means") || ansLower.includes("shows")) {
-              strengths.push(`• Clear reasoning by explaining the meaning or rule behind your answer.`);
-            } else {
-              weaknesses.push(`• Try adding supporting evidence from the question (e.g., "This shows that..." or "Because...").`);
-            }
+          if (ansLower.includes("because") || ansLower.includes("since") || ansLower.includes("for example") || ansLower.includes("when i")) {
+            strengths.push(`• Great job supporting your point with reasons or personal examples!`);
           } else {
-            if (ansLower.includes("example") || ansLower.includes("experience") || ansLower.includes("when i") || ansLower.includes("last")) {
-              strengths.push(`• Great job supporting your point with a personal experience or concrete example!`);
-            } else {
-              weaknesses.push(`• Adding a specific personal example (e.g., "For instance, at school...") will make your answer much stronger.`);
-            }
+            weaknesses.push(`• Try adding a concrete reason or personal example (e.g., "For example, at school...") to make your answer stronger.`);
           }
 
-          content.innerText = `🟢 Strengths:\n${strengths.join("\n") || "• Clear initial attempt to answer the question."}\n\n🔴 Areas for Improvement:\n${weaknesses.join("\n") || "• Good structure! Focus on natural pronunciation and confidence."}\n\n👉 Want to see how your answer can be upgraded? Click the button below!`;
+          content.innerText = `🟢 Strengths:\n${strengths.join("\n") || "• Clear initial attempt to answer the question."}\n\n🔴 Areas for Improvement:\n${weaknesses.join("\n") || "• Good structure! Focus on natural pronunciation and confidence."}\n\n👉 Ready to see how your answer can be upgraded? Choose an option below!`;
         } else {
-          if (academic) {
-            // 學科知識題診斷
+          if (qType === 'ACADEMIC') {
             if (ans.length >= 10) strengths.push(`• 能夠用完整句子回應學科問題（共 ${ans.length} 字），態度認真。`);
-            else weaknesses.push(`• 回答較為簡短（目前 ${ans.length} 字），建議除了說出答案名稱外，再補上一句解釋原因或作用。`);
+            else weaknesses.push(`• 回答較簡短（目前 ${ans.length} 字），建議除了說出答案名稱外，再補上一句解釋原因或表達效果。`);
 
-            if (ansLower.includes("因為") || ansLower.includes("表達") || ansLower.includes("作用") || ansLower.includes("意思") || ansLower.includes("說明")) {
-              strengths.push(`• 具備解題邏輯，嘗試闡述背後的原理或修辭效果。`);
+            if (ansLower.includes("因為") || ansLower.includes("表達") || ansLower.includes("作用") || ansLower.includes("意思")) {
+              strengths.push(`• 具備解題邏輯，嘗試闡述背後的原理或作用。`);
             } else {
-              weaknesses.push(`• 建議在答案中加入「因為……表達了……的作用」等分析字眼，令答案更完整。`);
-            }
-
-            // 如果老師有設定標準答案，檢查學生是否命中關鍵字
-            if (q.desc && q.desc.trim().length > 0) {
-              const keywords = q.desc.match(/「([^」]+)」/g);
-              if (keywords && keywords.length > 0) {
-                const cleanKeys = keywords.map(k => k.replace(/[「」]/g, ''));
-                const hit = cleanKeys.some(k => ans.includes(k));
-                if (hit) {
-                  strengths.push(`• 準確命中本題的核心關鍵詞（${cleanKeys.join(' / ')}）！`);
-                } else {
-                  weaknesses.push(`• 答案似乎未提及本題的核心概念（提示方向：${cleanKeys.join(' / ')}），建議再仔細審題。`);
-                }
-              }
+              weaknesses.push(`• 建議加入「因為……表達了……的作用」等分析字眼，令答案更完整。`);
             }
           } else {
-            // 一般面試題診斷
-            if (ans.length >= 35) strengths.push(`• 作答篇幅充實（已達 ${ans.length} 字），展現了良好的表達意願。`);
+            if (ans.length >= 30) strengths.push(`• 作答篇幅充實（已達 ${ans.length} 字），展現了良好的表達意願。`);
             else weaknesses.push(`• 字數稍顯不足（目前僅 ${ans.length} 字），建議補充更多細節，擴充至 3-4 句完整句子。`);
 
-            const exampleWords = ["例如", "記得有一次", "上學期", "經驗", "曾經", "例子", "在學校", "參加"];
+            const exampleWords = ["例如", "記得有一次", "上學期", "經驗", "曾經", "例子", "在學校", "參加", "試過"];
             if (exampleWords.some(w => ansLower.includes(w))) {
               strengths.push(`• 能夠結合個人生活或校園事例來支持觀點，具說服力。`);
             } else {
@@ -642,16 +648,15 @@
             if (logicWords.some(w => ansLower.includes(w))) {
               strengths.push(`• 邏輯清晰，能善用關聯詞組織句子。`);
             } else {
-              weaknesses.push(`• 建議使用「第一……此外……總括來說……」等連接詞，令條理更分明。`);
+              weaknesses.push(`• 建議使用「首先……此外……總括來說……」等連接詞，令條理更分明。`);
             }
           }
 
-          content.innerText = `🟢 優點 (Strengths)：\n${strengths.join("\n") || "• 具備基本答題意願，勇於表達。"}\n\n🔴 缺點與改進方向 (Areas for Improvement)：\n${weaknesses.join("\n") || "• 整體表現不錯！繼續保持自信與流暢度。"}\n\n👉 看完評語後，如果想參考如何把你的答案潤飾得更好，請點擊下方按鈕！`;
+          content.innerText = `🟢 優點 (Strengths)：\n${strengths.join("\n") || "• 具備基本答題意願，勇於表達。"}\n\n🔴 缺點與改進方向 (Areas for Improvement)：\n${weaknesses.join("\n") || "• 整體表現不錯！繼續保持自信與流暢度。"}\n\n👉 看完評語後，你可以點擊下方按鈕在本頁生成建議答案，或先按「1. 複製題目與作答內容」再按「2. 跳轉至 Gemini 網站貼上」！`;
         }
-      }, 500);
+      }, 350);
     }
 
-    // 🌟 第二階段：當學生看完回饋後，按鍵才結合「學生剛才的作答 + 題目類型 + 教師標準答案」生成精準建議
     function generatePersonalizedSample() {
       const q = questions[currentQKey];
       const studentAns = document.getElementById('studentAnswer').value.trim();
@@ -660,84 +665,133 @@
       const sampleContent = document.getElementById('personalizedSampleContent');
       const btn = document.getElementById('genSampleBtn');
 
-      btn.innerText = "正在結合你的作答生成建議...";
+      const qType = classifyQuestionType(q.title);
+      const hasValidInput = studentAns.length >= 4 && !studentAns.includes("不知道") && !studentAns.includes("冇");
+      const cleanAns = studentAns.replace(/[。！!.]+$/, '');
 
-      setTimeout(() => {
-        let output = "";
+      let output = "";
 
-        // 1. 若教師有設定專屬標準答案，優先顯示教師標準答案
-        if (q.desc && q.desc.trim().length > 0) {
-          output += isEnglish
-            ? `📌 【Teacher's Standard Reference Answer】:\n${q.desc.trim()}\n\n`
-            : `📌 【教師設定標準參考答案】：\n${q.desc.trim()}\n\n`;
-        }
+      if (q.desc && q.desc.trim().length > 0) {
+        output += isEnglish
+          ? `📌 【Teacher's Reference Answer】:\n${q.desc.trim()}\n\n`
+          : `📌 【教師設定標準參考】：\n${q.desc.trim()}\n\n`;
+      }
 
-        // 2. 根據題型與學生剛才輸入的實際內容，生成針對性的改寫與引導
-        const academic = isAcademicQuestion(q.title);
-        const hasValidStudentInput = studentAns.length >= 4 && !studentAns.includes("不知道") && !studentAns.includes("冇");
-
-        if (academic) {
-          if (isEnglish) {
-            output += `💡 【How to Structure Your Answer】:\n• Step 1: Directly state the core answer to "${q.title}".\n• Step 2: Quote the exact words from the question as evidence.\n• Step 3: Explain the effect or reasoning clearly.`;
-            if (hasValidStudentInput) {
-              output += `\n\n✨ 【Polished Version Based on Your Input】:\n"Thank you for this question. Based on the sentence, ${studentAns.replace(/\.$/, '')}. Looking closely at the wording, the author uses this expression to emphasize the emotion and convey a vivid meaning to the reader."`;
-            }
+      if (isEnglish) {
+        if (hasValidInput) {
+          if (qType === 'SELF_INTRO') {
+            output += `✨ 【Upgraded Personal Introduction】:\n"Good morning teachers. Thank you for giving me this opportunity to introduce myself. ${cleanAns}. In my primary school life, I actively participate in school activities and always try my best to help my classmates. I hope to continue developing my strengths at your secondary school."`;
+          } else if (qType === 'SITUATIONAL') {
+            output += `✨ 【Upgraded Problem-Solving Answer】:\n"Good morning teachers. When facing this situation, ${cleanAns}. First, I would stay calm and listen carefully to different opinions. Then, I would communicate patiently with my teammates to find the best solution together. I believe teamwork and patience can solve most challenges."`;
           } else {
-            output += `💡 【學科／閱讀題高分作答公式】:\n1. 直接點題：開門見山說出正確答案（例如修辭手法名稱、中心思想或計算結果）。\n2. 引用原文：指出題目中的關鍵字詞作為依據。\n3. 說明作用：解釋這樣寫帶來的表達效果。`;
-            if (hasValidStudentInput) {
-              const cleanAns = studentAns.replace(/[。！!]$/, '');
-              output += `\n\n✨ 【結合你剛才想法的潤飾示範】:\n「各位老師好！針對『${q.title}』這道題目，我的答案是：${cleanAns}。從句子的用詞可以看出，作者透過這樣的寫法，能夠更加生動形象地表達出當中的真摯情感，令讀者產生共鳴。」`;
-            } else if (!q.desc) {
-              output += `\n\n✨ 【作答句式參考】:\n「各位老師好！針對『${q.title}』，這句運用了【請填入修辭／概念】，因為作者將【題目關鍵詞】賦予了生動的表達效果，突出了文章的中心思想。」`;
-            }
+            output += `✨ 【Upgraded Version Based on Your Input】:\n"Good morning teachers. Regarding '${q.title}', ${cleanAns}. From my experience at primary school, this has taught me to be more thoughtful and responsible. Therefore, I will keep practicing this positive habit in secondary school."`;
           }
         } else {
-          // 個人觀點與經驗面試題：將學生的實際回答嵌入 PREP / STAR 升級框架中
-          if (isEnglish) {
-            output += `💡 【${q.band} Interview Upgrade Framework (PREP)】:\n• Point: State your main idea clearly.\n• Reason & Example: Expand on your own thoughts with a real example.\n• Conclusion: Connect back to your enthusiasm for secondary school.\n\n`;
-            if (hasValidStudentInput) {
-              const cleanAns = studentAns.replace(/\.$/, '');
-              output += `✨ 【Upgraded Version Based on Your Answer】:\n"Good morning teachers. Regarding '${q.title}', my core perspective is that ${cleanAns}. In my primary school experience, practicing this mindset helped me overcome challenges and work effectively with my classmates. I look forward to bringing this positive attitude to your school."`;
-            } else {
-              output += `✨ 【Suggested Answer Template】:\n"Good morning teachers. In response to '${q.title}', I believe that maintaining a positive and proactive attitude is essential. For example, during primary school group projects, I always listen carefully to teammates and take responsibility for my tasks. I hope to continue growing at your school."`;
-            }
-          } else {
-            output += `💡 【${q.band} 面試升級架構（保留你的原意並加強結構）】:\n• 開頭點題：直接帶出你的核心想法。\n• 展開說明：把你剛才提到的重點加上具體理由或校園事例。\n• 結尾昇華：連結到你對中學生活的期待。\n\n`;
-            if (hasValidStudentInput) {
-              const cleanAns = studentAns.replace(/[。！!]$/, '');
-              output += `✨ 【結合你剛才想法的潤飾示範】:\n「各位面試官老師好！針對『${q.title}』這個題目，我的看法是：${cleanAns}。以我在小學的學習與校園生活經驗為例，這份體會讓我學會了更加主動思考與與人合作。總括而言，我希望能將這份積極的態度帶入貴校的中學生活，不斷自我提升。」`;
-            } else {
-              output += `✨ 【作答句式參考】:\n「各位面試官老師好！針對『${q.title}』這個題目，我的核心看法是：【說出你的立場】。原因主要有兩點：第一，這能培養我們的責任感；第二，在日常生活與學習中也非常受用。總括而言，保持積極開放的態度是我一直努力的方向。」`;
-            }
-          }
+          output += `💡 【Please enter 1-2 sentences of your own ideas first!】\nOnce you write down your basic thoughts in the answer box above, we will tailor a complete answer specifically around your own story!`;
         }
+      } else {
+        if (hasValidInput) {
+          if (qType === 'ACADEMIC') {
+            output += `💡 【學科／閱讀理解答題步驟】：\n1. 開門見山說出核心答案；\n2. 指出題目中的關鍵字詞作為依據；\n3. 說明背後的表達作用。\n\n✨ 【結合你作答的潤飾示範】：\n「各位老師好！針對『${q.title}』這道題目，我的答案是：${cleanAns}。從句子的關鍵用詞可以看出，作者透過這樣的寫法，能夠更加生動形象地突出主題與情感，令讀者留下深刻印象。」`;
+          } else if (qType === 'SELF_INTRO') {
+            output += `💡 【自我介紹／個人特質升級架構】：\n• 禮貌問好 ＋ 帶出你的核心特質（${cleanAns}） ＋ 校園生活實例 ＋ 對中學的期許。\n\n✨ 【結合你剛才內容的潤飾示範】：\n「各位面試官老師好！很高興今天能來到貴校參加面試。關於我自己的特質與興趣，${cleanAns}。在小學的校園生活裡，這份特質讓我懂得主動學習，也樂於與同學互相幫忙。如果有機會入讀貴校，我希望能積極參與課外活動，發揮所長。」`;
+          } else if (qType === 'SITUATIONAL') {
+            output += `💡 【情境應變題升級架構】：\n• 保持冷靜 ＋ 你的核心做法（${cleanAns}） ＋ 溝通與解決步驟 ＋ 團隊反思。\n\n✨ 【結合你剛才內容的潤飾示範】：\n「各位老師好！如果遇到『${q.title}』的情況，我會這樣處理：${cleanAns}。首先，我會保持冷靜，細心聆聽身邊同學或老師的意見；接著，我會按事情的輕重緩急一步步解決問題。透過這次思考，我明白遇到困難時只要冷靜溝通，就一定能找到解決方法。」`;
+          } else if (qType === 'SCHOOL_READING') {
+            output += `💡 【書籍／科目／校園題升級架構】：\n• 點出選擇（${cleanAns}） ＋ 吸引你的原因 ＋ 帶給你的得著。\n\n✨ 【結合你剛才內容的潤飾示範】：\n「各位老師好！針對『${q.title}』這個問題，我的分享是：${cleanAns}。在接觸和學習的過程中，它不但豐富了我的知識，更教會我如何從不同角度思考問題。我希望升上中學後，能繼續在這方面深入探索。」`;
+          } else {
+            output += `💡 【個人觀點題升級架構】：\n• 明確表達你的看法（${cleanAns}） ＋ 結合生活經驗說明 ＋ 總結體會。\n\n✨ 【結合你剛才內容的潤飾示範】：\n「各位面試官老師好！針對『${q.title}』，我的看法是：${cleanAns}。在日常學習與生活中，我深刻體會到這一點的重要性，因為它能幫助我們不斷進步並與人融洽相處。因此，我會在未來的中學生活中繼續堅持這個做法。」`;
+          }
+        } else {
+          output += `💡 【溫馨提示】：\n你還沒有在上方作答區寫下你的個人想法喔！\n• 方法一：請先在上方輸入框寫下 1-2 句你自己的想法，再按一次本按鈕，系統就會把你的想法潤飾成完整範文！\n• 方法二：先按「1. 複製題目與作答內容」，再按「2. 跳轉至 Gemini 網站貼上」，讓 Gemini 為你示範！`;
+        }
+      }
 
-        sampleContent.innerText = output.trim();
-        sampleBox.classList.remove('hidden');
-        btn.innerHTML = `<i data-lucide="refresh-cw" class="w-4 h-4"></i> 重新生成建議答案`;
+      sampleContent.innerText = output.trim();
+      sampleBox.classList.remove('hidden');
+      btn.innerHTML = `<i data-lucide="refresh-cw" class="w-4 h-4"></i> 更新建議答案`;
+      lucide.createIcons();
+    }
+
+    function buildExternalPrompt() {
+      const q = questions[currentQKey];
+      const studentAns = document.getElementById('studentAnswer').value.trim();
+      const teacherRef = q.desc ? `\n【老師參考標準】：${q.desc}` : '';
+      const studentPart = studentAns ? `\n【我剛才試寫的答案】：${studentAns}` : '\n【我剛才試寫的答案】：（尚未作答，請直接示範）';
+
+      if (q.lang === 'English') {
+        return `You are a Hong Kong secondary school admission interview coach helping a Primary 6 student (${q.band} level).\nInterview Question: "${q.title}"${teacherRef}${studentPart}\n\nPlease:\n1. Give brief, encouraging feedback on my attempt (if provided).\n2. Provide a natural, high-scoring P6 interview sample answer (around 60-80 words) that incorporates my ideas if applicable. Use clear, authentic English suitable for a 12-year-old student.`;
+      } else {
+        return `你是一位資深的香港小學升中面試導師，正在指導一位小六學生（目標組別：${q.band}）。\n面試題目：「${q.title}」${teacherRef}${studentPart}\n\n請幫我完成以下兩件事（請用繁體中文、親切自然的口語風格）：\n1. 簡短點評我剛才試寫的答案有什麼優點與可以補充的地方；\n2. 結合我的想法，為這道題目寫一篇結構完整（開頭有禮貌問好、中間有具體理由或事例、結尾有總結）、約 120-150 字的升中面試高分示範答案。`;
+      }
+    }
+
+    function copyToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+        return Promise.resolve();
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    // 獨立複製按鈕：複製後按鈕轉為綠色確認狀態，方便接著按右邊的跳轉按鈕
+    function copyPromptOnly() {
+      if (!currentQKey || !questions[currentQKey]) return;
+      const promptText = buildExternalPrompt();
+      const btn = document.getElementById('copyPromptBtn');
+      copyToClipboard(promptText).then(() => {
+        btn.classList.remove('bg-white', 'border-indigo-600', 'text-indigo-700');
+        btn.classList.add('bg-emerald-50', 'border-emerald-600', 'text-emerald-700');
+        btn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> 已複製！請按右鍵跳轉貼上`;
         lucide.createIcons();
-      }, 400);
+      });
     }
 
     function teacherGenerateAiAnswer() {
       const title = document.getElementById('qTitleInput').value.trim();
-      const btn = document.getElementById('teacherAiGenBtn');
-
       if (!title) {
         alert("請先輸入題目內容！");
         return;
       }
+      const qType = classifyQuestionType(title);
+      if (qType === 'ACADEMIC') {
+        document.getElementById('qDescInput').value = `1. 直接說出核心答案（如修辭名稱／中心思想）；\n2. 引用題目關鍵字詞作證；\n3. 說明表達效果與作用。`;
+      } else {
+        document.getElementById('qDescInput').value = `高分答題要點：\n1. 有禮貌問好並開門見山表達立場；\n2. 結合一個具體的小學學習或生活事例；\n3. 總結個人體會與對中學生活的期待。`;
+      }
+    }
 
-      btn.innerText = "生成中...";
-      setTimeout(() => {
-        if (isAcademicQuestion(title)) {
-          document.getElementById('qDescInput').value = `1. 直接說出核心答案（如修辭名稱／概念）；\n2. 引用題目關鍵字詞作證；\n3. 說明表達效果與作用。`;
-        } else {
-          document.getElementById('qDescInput').value = `建議作答重點：\n1. 開門見山表達個人立場或特質；\n2. 舉出一個具體的小學學習或生活事例；\n3. 總結個人反思與對中學的期望。`;
-        }
-        btn.innerHTML = `<i data-lucide="sparkles" class="w-3 h-3"></i> AI 生成答題框架`;
-        lucide.createIcons();
-      }, 300);
+    function generateAiQuestions() {
+      const lang = document.getElementById('batchLang').value;
+      let aiResults = [];
+      if (lang === 'English') {
+        aiResults = [
+          'What is your favorite book and what did you learn from it?',
+          'How do you handle stress when preparing for examinations?',
+          'If you could change one school rule, what would it be and why?',
+          'Describe a proud moment during your primary school years.'
+        ];
+      } else {
+        aiResults = [
+          '請分享一次你克服困難或挫敗的經驗，並談談你的學習。',
+          '如果你有機會設計一堂全新的學校課程，你會想設計什麼主題？',
+          '談談你最崇拜的人或榜樣，他對你產生了什麼影響？',
+          '在小組合作中，如果組員之間意見不合，你會如何處理？'
+        ];
+      }
+      document.getElementById('batchInput').value = aiResults.join('\n');
     }
 
     function setupSpeechRecognition() {
@@ -905,32 +959,6 @@
     function openBatchModal() {
       document.getElementById('batchInput').value = '';
       document.getElementById('batchModal').classList.remove('hidden');
-    }
-
-    function generateAiQuestions() {
-      const lang = document.getElementById('batchLang').value;
-      const btn = document.getElementById('aiGenBtn');
-      
-      btn.innerText = '生成中...';
-      setTimeout(() => {
-        let aiResults = [];
-        if (lang === 'English') {
-          aiResults = [
-            'What is your favorite book and what did you learn from it?',
-            'How do you handle stress when preparing for examinations?',
-            'If you could change one school rule, what would it be and why?'
-          ];
-        } else {
-          aiResults = [
-            '請分享一次你克服困難或挫敗的經驗，並談談你的學習。',
-            '如果你有機會設計一堂全新的學校課程，你會想設計什麼主題？',
-            '談談你最崇拜的人或榜樣，他對你產生了什麼影響？'
-          ];
-        }
-        document.getElementById('batchInput').value = aiResults.join('\n');
-        btn.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI 生成小六題目`;
-        lucide.createIcons();
-      }, 500);
     }
 
     function saveBatchQuestions() {
